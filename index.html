@@ -3,158 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مساعد يوسف الذكي 🎓</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    <title>المساعد الدراسي الذكي PRO 🎓</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #f1f5f9; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-        .card { background: white; border-radius: 24px; padding: 1.5rem; border-top: 6px solid #6366f1; transition: 0.3s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .btn-action { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border-radius: 16px; padding: 1rem; font-weight: bold; transition: 0.2s; cursor: pointer; text-align: center; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; }
-        .iq-box { animation: shake 0.5s infinite; border: 4px solid #ef4444; }
-        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(5px); } 50% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
+        body { background: #f8fafc; font-family: 'Segoe UI', Tahoma, sans-serif; overflow-x: hidden; }
+        .card { background: white; border-radius: 24px; padding: 1.5rem; transition: 0.3s; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
+        .btn-main { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border-radius: 18px; padding: 1rem; font-weight: bold; transition: 0.2s; cursor: pointer; text-align: center; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center; }
+        .study-active { border: 4px solid #6366f1; animation: pulse border 2s infinite; }
+        .break-active { border: 4px solid #10b981; }
+        @keyframes pulse-border { 0% { border-color: #6366f1; } 50% { border-color: #a855f7; } 100% { border-color: #6366f1; } }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div id="iqModal" class="modal">
-        <div class="card w-full max-w-sm text-center iq-box">
-            <h2 class="text-2xl font-bold text-red-600 mb-4">⚠️ اختبار يقظة!</h2>
-            <p id="iqQuestion" class="text-xl mb-6 font-black"></p>
-            <input id="iqAnswer" type="number" placeholder="الإجابة هنا" class="w-full p-4 border rounded-2xl mb-4 text-center text-2xl">
-            <button onclick="checkIQ()" class="btn-action w-full">أنا صاحي ومركز! ✅</button>
+    <div id="loginOverlay" class="fixed inset-0 bg-white flex items-center justify-center p-6 z-[2000] hidden">
+        <div class="max-w-sm w-full text-center">
+            <div class="text-6xl mb-6">🎓</div>
+            <h2 class="text-3xl font-black text-slate-800 mb-2">أهلاً بك يا بطل!</h2>
+            <p class="text-slate-500 mb-8">دخل اسمك عشان نبدأ ننظم جدولك</p>
+            <input id="userNameInput" type="text" placeholder="اكتب اسمك هنا..." class="w-full p-5 bg-slate-100 rounded-2xl mb-4 text-center text-xl outline-none focus:ring-4 focus:ring-indigo-200">
+            <button onclick="login()" class="btn-main w-full py-5 text-xl">ابدأ رحلتك 🚀</button>
         </div>
     </div>
 
-    <div id="subModal" class="modal">
-        <div class="card w-full max-w-md text-center">
-            <div class="text-4xl mb-2">⚡</div>
-            <h3 id="modalSubName" class="text-2xl font-bold text-indigo-600"></h3>
-            <p class="text-slate-500 mb-6 italic">الذكاء المدمج جاهز للتخطيط...</p>
-            <div class="space-y-4">
-                <button onclick="autoPlan('today')" class="btn-action w-full bg-indigo-600">خطة مذاكرة "النهاردة" (بالساعة) 🔥</button>
-                <button onclick="autoPlan('long')" class="btn-action w-full bg-slate-800 text-white">توزيع على باقي الأيام 📅</button>
-                <button onclick="closeModal()" class="text-slate-400 font-bold">إلغاء</button>
-            </div>
-            <div id="planResult" class="mt-6 p-4 bg-indigo-50 rounded-2xl text-right text-sm leading-relaxed hidden border border-indigo-100"></div>
+    <div id="iqModal" class="modal">
+        <div class="card w-full max-w-sm text-center border-4 border-red-500">
+            <h2 class="text-2xl font-bold text-red-600 mb-4">⚠️ فك الشفرة عشان تقفل!</h2>
+            <p id="iqQuestion" class="text-3xl mb-6 font-black tracking-widest text-slate-800"></p>
+            <input id="iqAnswer" type="number" class="w-full p-4 bg-slate-100 rounded-2xl mb-4 text-center text-3xl font-bold">
+            <button onclick="checkIQ()" class="btn-main w-full bg-red-600">تأكيد الإجابة ✅</button>
         </div>
     </div>
 
     <div class="max-w-6xl mx-auto">
-        <header class="flex justify-between items-center mb-10">
-            <div>
-                <h1 class="text-3xl font-black text-slate-800">مساعد يوسف <span class="text-indigo-600">PRO</span></h1>
-                <p id="welcomeMsg" class="text-slate-500 font-bold"></p>
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+            <div class="text-center md:text-right">
+                <h1 class="text-4xl font-black text-slate-900 mb-1">المساعد الذكي <span class="text-indigo-600">PRO</span></h1>
+                <p id="welcomeMsg" class="text-slate-500 font-bold text-lg"></p>
             </div>
-            <div class="text-4xl">🎓</div>
+            <button onclick="logout()" class="text-slate-400 hover:text-red-500 transition font-bold">تبديل المستخدم 👤</button>
         </header>
 
-        <div class="dashboard-grid">
-            <div class="card flex flex-col justify-center text-center">
-                <h2 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-4">تركيزك الحالي</h2>
-                <div class="flex items-center justify-center gap-4 mb-6">
-                    <input id="customMin" type="number" value="25" class="w-20 p-3 text-center bg-slate-100 rounded-2xl text-2xl font-black text-indigo-600">
-                    <span class="font-bold text-slate-500">دقيقة</span>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <div id="timerCard" class="card text-center flex flex-col justify-center relative overflow-hidden">
+                <div id="statusLabel" class="text-xs font-black uppercase tracking-widest text-indigo-500 mb-2">في انتظارك..</div>
+                <div id="timerDisp" class="text-8xl font-black text-slate-800 mb-8 tracking-tighter">00:00</div>
+                <div id="sessionInfo" class="text-slate-400 text-sm mb-6 font-bold">اختر مادة من الجدول تحت عشان نبدأ</div>
+                
+                <div class="flex gap-3">
+                    <button id="timerBtn" onclick="toggleTimer()" class="flex-[3] btn-main py-5 text-xl shadow-lg shadow-indigo-200">ابدأ الآن ▶️</button>
+                    <button onclick="skipSession()" class="flex-1 bg-slate-100 text-slate-500 rounded-2xl font-bold hover:bg-slate-200">تخطي ⏭️</button>
                 </div>
-                <div id="timerDisp" class="text-7xl font-black text-slate-800 mb-8">25:00</div>
-                <div class="flex gap-2">
-                    <button id="timerBtn" onclick="toggleTimer()" class="flex-[2] btn-action">ابدأ ▶️</button>
-                    <button onclick="resetTimer()" class="flex-1 bg-slate-100 rounded-2xl font-bold text-slate-400">🔄</button>
-                </div>
-                <button id="stopBtn" onclick="stopAlarm()" class="hidden w-full mt-2 bg-red-600 text-white py-4 rounded-2xl font-bold animate-bounce">إيقاف الإنذار 🔕</button>
+                <button id="stopBtn" onclick="triggerAlarmStop()" class="hidden w-full mt-4 bg-red-600 text-white py-5 rounded-2xl font-black animate-pulse">إسكات الإنذار 🔕</button>
             </div>
 
-            <div class="card">
-                <h2 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6 tracking-widest">إضافة مادة</h2>
+            <div class="card border-t-6 border-indigo-400">
+                <h2 class="text-slate-800 font-black text-xl mb-6">➕ إضافة مادة للجدول</h2>
                 <div class="space-y-4">
-                    <input id="subName" type="text" placeholder="اسم المادة" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-400">
-                    <div class="flex gap-2">
-                        <input id="subPgs" type="number" placeholder="عدد الصفحات" class="w-1/2 p-4 bg-slate-50 rounded-2xl">
-                        <input id="subDate" type="date" class="w-1/2 p-4 bg-slate-50 rounded-2xl text-xs">
+                    <div class="relative">
+                        <input id="subName" type="text" placeholder="اسم المادة (محاسبة، إدارة..)" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-400 outline-none">
                     </div>
-                    <button onclick="addSub()" class="btn-action w-full">إضافة للمخزن 📦</button>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input id="subPgs" type="number" placeholder="كم صفحة؟" class="p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-indigo-400">
+                        <input id="subDate" type="date" class="p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-indigo-400 text-xs">
+                    </div>
+                    <button onclick="addSub()" class="btn-main w-full py-5 text-lg shadow-xl shadow-indigo-100">تثبيت في الجدول 📌</button>
                 </div>
             </div>
+        </div>
 
-            <div class="card md:col-span-2 lg:col-span-1">
-                <h2 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6">المواد المسجلة (اضغط للتخطيط)</h2>
-                <div id="subjectsList" class="space-y-3 max-h-[300px] overflow-y-auto pr-2"></div>
-            </div>
+        <div class="w-full">
+            <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">
+                📅 جدول موادك الدراسية
+                <span id="subCount" class="text-sm bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">0</span>
+            </h2>
+            <div id="subjectsList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
+                </div>
         </div>
     </div>
 
     <audio id="bellSound" src="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3" loop></audio>
 
     <script>
-        let subjects = JSON.parse(localStorage.getItem('y_pro_subs')) || [];
-        let timerInterval, remainingTime, selectedSubIndex = null;
-        let currentIqAnswer = null;
+        let user = JSON.parse(localStorage.getItem('study_user')) || null;
+        let subjects = [];
+        let timerInterval, remainingTime, isBreak = false, currentIqAnswer = null;
+        let activeSub = null;
 
-        window.onload = () => { 
-            document.getElementById('welcomeMsg').innerText = "جاهز تفرتك الكتب يا بطل؟ 🔥";
-            renderSubjects();
-            setInterval(triggerIQ, 600000); // سؤال كل 10 دقائق
+        window.onload = () => {
+            if (!user) {
+                document.getElementById('loginOverlay').classList.remove('hidden');
+            } else {
+                setupUser();
+            }
         };
+
+        function login() {
+            const name = document.getElementById('userNameInput').value;
+            if (!name) return alert("من فضلك ادخل اسمك");
+            user = { name: name };
+            localStorage.setItem('study_user', JSON.stringify(user));
+            document.getElementById('loginOverlay').classList.add('hidden');
+            setupUser();
+        }
+
+        function setupUser() {
+            document.getElementById('welcomeMsg').innerText = `جاهز تفرتك الكتب يا ${user.name}؟ 🔥`;
+            subjects = JSON.parse(localStorage.getItem(`subs_${user.name}`)) || [];
+            renderSubjects();
+        }
+
+        function logout() {
+            localStorage.removeItem('study_user');
+            location.reload();
+        }
 
         function addSub() {
             const n = document.getElementById('subName').value, p = document.getElementById('subPgs').value, d = document.getElementById('subDate').value;
-            if(!n || !p || !d) return alert('كمل البيانات يا وحش!');
-            subjects.push({ n, p, d });
-            localStorage.setItem('y_pro_subs', JSON.stringify(subjects));
+            if(!n || !p || !d) return alert("كمل البيانات يا وحش!");
+            subjects.push({ n, p, d, id: Date.now() });
+            saveAndRender();
+            document.getElementById('subName').value = ''; document.getElementById('subPgs').value = '';
+        }
+
+        function saveAndRender() {
+            localStorage.setItem(`subs_${user.name}`, JSON.stringify(subjects));
             renderSubjects();
         }
 
         function renderSubjects() {
             const container = document.getElementById('subjectsList');
+            document.getElementById('subCount').innerText = subjects.length;
             container.innerHTML = '';
-            subjects.forEach((s, i) => {
+            
+            if(subjects.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center p-20 text-slate-400 font-bold border-4 border-dashed rounded-3xl">الجدول فاضي.. ضيف مادة عشان نبدأ!</div>`;
+                return;
+            }
+
+            subjects.forEach((s) => {
                 const days = Math.ceil((new Date(s.d) - new Date())/(1000*60*60*24));
                 container.innerHTML += `
-                    <div onclick="openModal(${i})" class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center cursor-pointer hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition">
-                        <div><b class="text-slate-800">${s.n}</b><p class="text-[10px] text-slate-400 uppercase">${s.p} صفحة • باقي ${days > 0 ? days : 0} يوم</p></div>
-                        <button onclick="event.stopPropagation(); removeSub(${i})" class="text-red-400 text-xs font-bold">حذف</button>
+                    <div class="card border-r-8 border-indigo-500 hover:translate-y-[-5px] transition-all cursor-pointer group" onclick="startSubjectPlan(${s.id})">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-2xl font-black text-slate-800 group-hover:text-indigo-600 transition">${s.n}</h3>
+                                <p class="text-slate-400 font-bold text-sm">📅 باقي ${days > 0 ? days : 0} يوم على الامتحان</p>
+                            </div>
+                            <span class="bg-indigo-50 text-indigo-600 p-2 rounded-xl text-xs font-black">${s.p} صفحة</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl mb-4 text-xs text-slate-500 leading-relaxed">
+                            💡 **خطة الذكاء:** هنقسمها لـ ${Math.ceil(s.p/5)} جلسة مذاكرة ببريكات منتظمة.
+                        </div>
+                        <button onclick="event.stopPropagation(); finishSubject(${s.id})" class="w-full py-3 bg-green-50 text-green-600 rounded-xl font-bold hover:bg-green-600 hover:text-white transition">
+                            أنا خلصت المادة دي ✅
+                        </button>
                     </div>`;
             });
         }
 
-        function openModal(i) { selectedSubIndex = i; document.getElementById('modalSubName').innerText = subjects[i].n; document.getElementById('subModal').style.display = 'flex'; document.getElementById('planResult').classList.add('hidden'); }
-        function closeModal() { document.getElementById('subModal').style.display = 'none'; }
-        function removeSub(i) { subjects.splice(i, 1); localStorage.setItem('y_pro_subs', JSON.stringify(subjects)); renderSubjects(); }
-
-        // التخطيط الأوتوماتيكي البديل لـ Gemini
-        function autoPlan(type) {
-            const s = subjects[selectedSubIndex];
-            const result = document.getElementById('planResult');
-            result.classList.remove('hidden');
-            let text = "";
-
-            if (type === 'today') {
-                const hoursNeeded = (s.p / 10).toFixed(1);
-                text = `💡 **خطة النهاردة:**\nعشان تخلص الـ ${s.p} صفحة، محتاج حوالي ${hoursNeeded} ساعة مذاكرة صافية.\n- ابدأ الساعة 4:00 عصراً.\n- ذاكر 50 دقيقة وخد 10 دقائق بريك.\n- خلص أول 20 صفحة قبل المغرب.`;
-            } else {
-                const days = Math.ceil((new Date(s.d) - new Date())/(1000*60*60*24));
-                const pgsPerDay = Math.ceil(s.p / (days > 0 ? days : 1));
-                text = `📅 **خطة الأيام المتبقية:**\nباقي ${days} يوم. عشان تذاكر بذكاء، خلص **${pgsPerDay} صفحة يومياً**.\nالأولوية دلوقتى تخلص الأجزاء الصعبة الأول وسيب المراجعة لآخر يومين.`;
-            }
-            result.innerText = text;
+        function finishSubject(id) {
+            subjects = subjects.filter(s => s.id !== id);
+            saveAndRender();
         }
 
-        // المنبه المزعج
+        // منطق المذاكرة والبريك الأوتوماتيكي
+        function startSubjectPlan(id) {
+            activeSub = subjects.find(s => s.id === id);
+            isBreak = false;
+            remainingTime = 60 * 60; // نبدأ بـ ساعة مذاكرة (لـ 5 صفحات مثلاً)
+            updateTimerDisplay();
+            document.getElementById('statusLabel').innerText = "وضع المذاكرة المستمرة 📖";
+            document.getElementById('sessionInfo').innerText = `المادة الحالية: ${activeSub.n} | ركز لإنهاء 5 صفحات`;
+            document.getElementById('timerCard').className = "card text-center flex flex-col justify-center relative overflow-hidden study-active";
+            alert(`يلا يا ${user.name}! الخطة بدأت: كل 5 صفحات هناخد بريك 15 دقيقة، وكل 10 صفحات بريك ساعة.`);
+        }
+
         function toggleTimer() {
             const btn = document.getElementById('timerBtn');
-            const customMin = document.getElementById('customMin').value;
-            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; btn.innerText = "استكمال ▶️"; }
-            else {
-                if (!remainingTime) remainingTime = customMin * 60;
-                btn.innerText = "إيقاف ⏸️";
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                btn.innerText = "استكمال ▶️";
+            } else {
+                if(!remainingTime) return alert("اختر مادة أولاً");
+                btn.innerText = "إيقاف مؤقت ⏸️";
                 timerInterval = setInterval(() => {
                     remainingTime--;
-                    const m = Math.floor(remainingTime / 60), s = remainingTime % 60;
-                    document.getElementById('timerDisp').innerText = `${m}:${s.toString().padStart(2, '0')}`;
-                    if (remainingTime <= 0) { 
+                    updateTimerDisplay();
+                    if(remainingTime <= 0) {
                         clearInterval(timerInterval);
-                        document.getElementById('bellSound').play(); 
+                        timerInterval = null;
+                        document.getElementById('bellSound').play();
                         document.getElementById('stopBtn').classList.remove('hidden');
                         document.getElementById('timerBtn').classList.add('hidden');
                     }
@@ -162,36 +203,59 @@
             }
         }
 
-        function stopAlarm() { 
-            // المنبه مش هيسكت غير لما يحل سؤال الـ IQ لو اشتغل
-            triggerIQ(); 
+        function updateTimerDisplay() {
+            const m = Math.floor(remainingTime / 60), s = remainingTime % 60;
+            document.getElementById('timerDisp').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
-        function resetTimer() { clearInterval(timerInterval); timerInterval = null; remainingTime = null; const customMin = document.getElementById('customMin').value; document.getElementById('timerDisp').innerText = `${customMin}:00`; }
+        function skipSession() {
+            if(!activeSub) return;
+            remainingTime = 1; // إنهاء الجلسة فوراً لتجربة المنبه
+        }
 
-        // نظام الـ IQ المفاجئ
-        function triggerIQ() {
-            const n1 = Math.floor(Math.random() * 20) + 5;
-            const n2 = Math.floor(Math.random() * 20) + 5;
+        function triggerAlarmStop() {
+            const n1 = Math.floor(Math.random() * 30) + 10;
+            const n2 = Math.floor(Math.random() * 30) + 10;
             currentIqAnswer = n1 + n2;
-            document.getElementById('iqQuestion').innerText = `${n1} + ${n2} = ؟`;
+            document.getElementById('iqQuestion').innerText = `${n1} + ${n2}`;
             document.getElementById('iqModal').style.display = 'flex';
         }
 
         function checkIQ() {
             const ans = document.getElementById('iqAnswer').value;
             if(parseInt(ans) === currentIqAnswer) {
-                const alarm = document.getElementById('bellSound');
-                alarm.pause(); alarm.currentTime = 0;
+                document.getElementById('bellSound').pause();
+                document.getElementById('bellSound').currentTime = 0;
                 document.getElementById('iqModal').style.display = 'none';
                 document.getElementById('stopBtn').classList.add('hidden');
                 document.getElementById('timerBtn').classList.remove('hidden');
                 document.getElementById('iqAnswer').value = '';
-                resetTimer();
-                alert("برافو يا يوسف! كدة اتأكدت إنك لسه فايق.");
+                nextPhase();
             } else {
-                alert("إجابة غلط! ركز وصفي ذهنك، المنبه مش هيسكت.");
+                alert("غلط! ركز يا بطل المنبه مش هيسكت");
             }
+        }
+
+        function nextPhase() {
+            const timerCard = document.getElementById('timerCard');
+            if(!isBreak) {
+                // خلص مذاكرة، نحدد نوع البريك
+                // افتراضياً: بريك 15 دقيقة
+                isBreak = true;
+                remainingTime = 15 * 60;
+                document.getElementById('statusLabel').innerText = "وقت البريك المستحق ☕";
+                document.getElementById('sessionInfo').innerText = "خد نفس عميق، البريك ده 15 دقيقة";
+                timerCard.className = "card text-center flex flex-col justify-center relative overflow-hidden break-active";
+            } else {
+                // خلص بريك، نرجع مذاكرة
+                isBreak = false;
+                remainingTime = 60 * 60;
+                document.getElementById('statusLabel').innerText = "رجعنا للجد يا بطل ✍️";
+                document.getElementById('sessionInfo').innerText = "الجولة القادمة: 5 صفحات كمان";
+                timerCard.className = "card text-center flex flex-col justify-center relative overflow-hidden study-active";
+            }
+            updateTimerDisplay();
+            document.getElementById('timerBtn').innerText = "ابدأ الجلسة ▶️";
         }
     </script>
 </body>
