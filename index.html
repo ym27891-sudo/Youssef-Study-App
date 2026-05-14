@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المساعد الدراسي الذكي PRO 🎓</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2997/2997312.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2997/2997312.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
@@ -89,7 +96,7 @@
         </div>
 
         <div class="w-full">
-            <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">📅 ترتيب الأولوية <span id="subCount" class="text-sm bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">0</span></h2>
+            <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3 text-right">📅 ترتيب الأولوية <span id="subCount" class="text-sm bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">0</span></h2>
             <div id="subjectsList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20"></div>
         </div>
     </div>
@@ -169,7 +176,6 @@
         function beBeast() {
             isBeastMode = true;
             document.getElementById('beBeastBtn').classList.add('hidden');
-            // تشغيل الأنيميشن والصوت
             document.getElementById('beastModal').style.display = 'flex';
             confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#f97316', '#fbbf24', '#ffffff'] });
             document.getElementById('cheerSound').play();
@@ -181,10 +187,9 @@
         function startSubjectPlan(id) {
             activeSub = subjects.find(s => s.id === id);
             isBreak = false;
-            let pgs = activeSub.p;
             let info = `المادة الحالية: ${activeSub.n}`;
-            if (pgs > 20 && !isBeastMode) {
-                info += `\n⚠️ تنبيه: هنذاكر 20 صفحة بس النهاردة والباقي يترحل لضمان تركيزك.`;
+            if (activeSub.p > 20 && !isBeastMode) {
+                info += `\n⚠️ تنبيه: هنذاكر 20 صفحة بس النهارده لضمان التركيز.`;
                 document.getElementById('beBeastBtn').classList.remove('hidden');
             } else {
                 document.getElementById('beBeastBtn').classList.add('hidden');
