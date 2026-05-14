@@ -6,11 +6,11 @@
     <title>المساعد الدراسي الذكي</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #f0f4f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f0f4f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: 0.3s; }
         .card { background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 5px solid #667eea; margin-bottom: 20px; }
-        .btn-grad { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; transition: 0.3s; }
+        .btn-grad { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; transition: 0.3s; cursor: pointer; }
         .btn-grad:active { transform: scale(0.95); }
-        #loginOverlay { background: rgba(240, 244, 248, 0.95); z-index: 100; }
+        #loginOverlay { background: rgba(240, 244, 248, 0.98); z-index: 100; }
     </style>
 </head>
 <body class="p-4">
@@ -18,11 +18,10 @@
     <!-- شاشة تسجيل الدخول -->
     <div id="loginOverlay" class="fixed inset-0 flex items-center justify-center p-6 hidden">
         <div class="card p-8 w-full max-w-md text-center">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800">أهلاً بك في المساعد الذكي 🎓</h2>
-            <p class="text-gray-600 mb-6 text-sm">دخل بياناتك عشان نبدأ ننظم وقتك</p>
-            <input id="userName" type="text" placeholder="اسمك بالكامل" class="w-full p-4 mb-3 border rounded-xl outline-none focus:ring-2 focus:ring-purple-400">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">أهلاً بك في مساعدك الذكي 🎓</h2>
+            <input id="userName" type="text" placeholder="اكتب اسمك هنا" class="w-full p-4 mb-3 border rounded-xl outline-none focus:ring-2 focus:ring-purple-400">
             <input id="userEmail" type="email" placeholder="بريدك الإلكتروني" class="w-full p-4 mb-6 border rounded-xl outline-none focus:ring-2 focus:ring-purple-400">
-            <button onclick="saveUser()" class="btn-grad w-full py-4 rounded-xl text-lg shadow-lg">ابدأ الآن 🚀</button>
+            <button onclick="saveUser()" class="btn-grad w-full py-4 rounded-xl text-lg shadow-lg">دخول 🚀</button>
         </div>
     </div>
 
@@ -32,41 +31,47 @@
         
         <!-- إضافة مادة -->
         <div class="card p-6">
-            <h2 class="font-bold mb-4 text-gray-700">📦 إضافة مادة للجدول</h2>
+            <h2 class="font-bold mb-4 text-gray-700">📦 إضافة مادة جديدة</h2>
             <input id="subName" type="text" placeholder="اسم المادة" class="w-full p-3 mb-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
             <input id="subPgs" type="number" placeholder="عدد الصفحات" class="w-full p-3 mb-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
             <input id="subDate" type="date" class="w-full p-3 mb-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
             <button onclick="addSub()" class="btn-grad w-full py-3 rounded-xl shadow-md">إضافة للمخزن ➕</button>
         </div>
 
-        <!-- منبه التركيز -->
+        <!-- منبه التركيز المعدل -->
         <div class="card p-6 text-center">
             <h2 class="font-bold mb-2 text-gray-700">⏱️ منبه التركيز</h2>
-            <div id="timerDisp" class="text-5xl font-bold text-blue-600 mb-4">25:00</div>
-            <button id="timerBtn" onclick="toggleTimer()" class="w-full bg-green-500 text-white py-3 rounded-xl font-bold shadow-md">ابدأ الجلسة ▶️</button>
+            <div class="flex justify-center items-center gap-2 mb-4">
+                <input id="customMinutes" type="number" value="25" class="w-16 p-2 text-center border rounded-lg text-lg font-bold text-blue-600">
+                <span class="text-gray-500">دقيقة</span>
+            </div>
+            <div id="timerDisp" class="text-6xl font-bold text-blue-600 mb-4">25:00</div>
+            <div class="flex gap-2">
+                <button id="timerBtn" onclick="toggleTimer()" class="flex-1 bg-green-500 text-white py-3 rounded-xl font-bold shadow-md">ابدأ ▶️</button>
+                <button onclick="resetTimer()" class="bg-gray-200 text-gray-600 px-4 py-3 rounded-xl font-bold">إعادة 🔄</button>
+            </div>
         </div>
 
-        <!-- تفاعل Gemini -->
+        <!-- استشارة Gemini -->
         <div class="card p-6 border-t-5 border-purple-500 bg-purple-50">
-            <h2 class="font-bold mb-2 text-purple-800 flex items-center justify-center">
-                ✨ استشارة Gemini الذكية
-            </h2>
-            <p class="text-[10px] text-gray-500 text-center mb-3">سيقوم الذكاء الاصطناعي بتحليل موادك وصنع جدول مخصص لك</p>
-            <button onclick="getAISchedule()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg">طلب جدول دراسي ذكي 🪄</button>
-            <div id="aiResponse" class="mt-4 text-gray-800 text-sm leading-relaxed whitespace-pre-line bg-white p-4 rounded-xl border border-purple-200 hidden shadow-inner"></div>
+            <h2 class="font-bold mb-2 text-purple-800 flex items-center justify-center">✨ ذكاء Gemini الاصطناعي</h2>
+            <button onclick="getAISchedule()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg">اطلب جدولك الدراسي الآن 🪄</button>
+            <div id="aiResponse" class="mt-4 text-gray-800 text-sm leading-relaxed whitespace-pre-line bg-white p-4 rounded-xl border border-purple-200 hidden shadow-md"></div>
         </div>
 
         <!-- قائمة المواد -->
         <div id="subjectsList" class="space-y-4 pb-12"></div>
     </div>
 
-    <audio id="bellSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
+    <!-- صوت التنبيه -->
+    <audio id="bellSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <script>
         let currentUser = JSON.parse(localStorage.getItem('study_user'));
         let subjects = JSON.parse(localStorage.getItem('study_subs')) || [];
+        let timerInterval;
+        let remainingTime;
 
-        // التحقق من وجود مستخدم
         window.onload = () => {
             if (!currentUser) {
                 document.getElementById('loginOverlay').classList.remove('hidden');
@@ -86,82 +91,85 @@
         }
 
         function showMain() {
-            document.getElementById('welcomeMsg').innerText = `منور يا ${currentUser.name.split(' ')[0]} 👋 جاهز للمذاكرة؟`;
+            document.getElementById('welcomeMsg').innerText = `يا أهلاً بك يا ${currentUser.name.split(' ')[0]} 👋`;
             renderSubjects();
         }
 
         function addSub() {
-            const n = document.getElementById('subName').value;
-            const p = document.getElementById('subPgs').value;
-            const d = document.getElementById('subDate').value;
-            if (!n || !p || !d) return alert('كمل بيانات المادة يا بطل!');
+            const n = document.getElementById('subName').value, p = document.getElementById('subPgs').value, d = document.getElementById('subDate').value;
+            if (!n || !p || !d) return alert('كمل البيانات يا بطل!');
             subjects.push({ n, p, d });
             localStorage.setItem('study_subs', JSON.stringify(subjects));
-            document.getElementById('subName').value = '';
-            document.getElementById('subPgs').value = '';
+            document.getElementById('subName').value = ''; document.getElementById('subPgs').value = '';
             renderSubjects();
         }
 
         function renderSubjects() {
             const container = document.getElementById('subjectsList');
-            container.innerHTML = subjects.length > 0 ? '<h3 class="font-bold text-gray-600 text-sm mb-2">موادك الحالية:</h3>' : '';
+            container.innerHTML = subjects.length > 0 ? '<h3 class="font-bold text-gray-600 text-sm mb-2">موادك:</h3>' : '';
             subjects.forEach((s, i) => {
-                const daysLeft = Math.ceil((new Date(s.d) - new Date()) / (1000 * 60 * 60 * 24));
+                const days = Math.ceil((new Date(s.d) - new Date()) / (1000 * 60 * 60 * 24));
                 container.innerHTML += `
                     <div class="card p-4 border-r-4 border-blue-500 flex justify-between items-center shadow-sm">
-                        <div>
-                            <b class="text-blue-900">${s.n}</b>
-                            <p class="text-[11px] text-gray-500">${s.p} صفحة | باقي ${daysLeft > 0 ? daysLeft : 0} يوم</p>
-                        </div>
-                        <button onclick="removeSub(${i})" class="text-red-400 text-xs hover:underline">حذف</button>
+                        <div><b class="text-blue-900">${s.n}</b><p class="text-[11px] text-gray-500">${s.p} ص | باقي ${days > 0 ? days : 0} يوم</p></div>
+                        <button onclick="removeSub(${i})" class="text-red-400 text-xs">حذف</button>
                     </div>`;
             });
         }
 
-        function removeSub(i) {
-            subjects.splice(i, 1);
-            localStorage.setItem('study_subs', JSON.stringify(subjects));
-            renderSubjects();
-        }
+        function removeSub(i) { subjects.splice(i, 1); localStorage.setItem('study_subs', JSON.stringify(subjects)); renderSubjects(); }
 
-        // المنبه
-        let timer;
+        // المنبه المطور
         function toggleTimer() {
             const btn = document.getElementById('timerBtn');
-            if (timer) {
-                clearInterval(timer);
-                timer = null;
+            const customMin = document.getElementById('customMinutes').value;
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
                 btn.innerText = "استكمال ▶️";
-                return;
+                btn.classList.replace('bg-orange-500', 'bg-green-500');
+            } else {
+                if (!remainingTime) remainingTime = customMin * 60;
+                btn.innerText = "إيقاف مؤقت ⏸️";
+                btn.classList.replace('bg-green-500', 'bg-orange-500');
+                
+                timerInterval = setInterval(() => {
+                    remainingTime--;
+                    const m = Math.floor(remainingTime / 60), s = remainingTime % 60;
+                    document.getElementById('timerDisp').innerText = `${m}:${s.toString().padStart(2, '0')}`;
+                    
+                    if (remainingTime <= 0) {
+                        clearInterval(timerInterval);
+                        document.getElementById('bellSound').play();
+                        alert(`عاش يا ${currentUser.name.split(' ')[0]}! وقت الاستراحة.`);
+                        resetTimer();
+                    }
+                }, 1000);
             }
-            let time = 25 * 60;
-            btn.innerText = "إيقاف مؤقت ⏸️";
-            timer = setInterval(() => {
-                time--;
-                const m = Math.floor(time / 60), s = time % 60;
-                document.getElementById('timerDisp').innerText = `${m}:${s.toString().padStart(2, '0')}`;
-                if (time <= 0) {
-                    clearInterval(timer);
-                    document.getElementById('bellSound').play();
-                    alert(`عاش يا ${currentUser.name.split(' ')[0]}! وقت الاستراحة.`);
-                    btn.innerText = "ابدأ الجلسة ▶️";
-                    document.getElementById('timerDisp').innerText = "25:00";
-                }
-            }, 1000);
         }
 
-        // الذكاء الاصطناعي (Gemini)
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            remainingTime = null;
+            const customMin = document.getElementById('customMinutes').value;
+            document.getElementById('timerDisp').innerText = `${customMin}:00`;
+            const btn = document.getElementById('timerBtn');
+            btn.innerText = "ابدأ ▶️";
+            btn.classList.remove('bg-orange-500');
+            btn.classList.add('bg-green-500');
+        }
+
+        // Gemini AI الذكي
         async function getAISchedule() {
-            if (subjects.length === 0) return alert('ضيف مواد الأول عشان Gemini يعرف يساعدك!');
+            if (subjects.length === 0) return alert('ضيف مواد الأول يا بطل!');
             const resBox = document.getElementById('aiResponse');
             resBox.classList.remove('hidden');
-            resBox.innerText = "جاري استشارة Gemini الذكي... لحظات";
+            resBox.innerText = "جاري استشارة Gemini... ثواني.";
 
             try {
-                const prompt = `أنا اسمي ${currentUser.name}. بذاكر حالياً المواد دي: ${JSON.stringify(subjects)}. 
-                اعملي جدول دراسي مريح بلهجة مصرية، ناديني باسمي في الرد، ووزع الصفحات على الأيام بذكاء. 
-                اديني نصيحة تشجيعية في الآخر تناسبني كطالب مجتهد.`;
-                
+                const prompt = `أنا اسمي ${currentUser.name}. موادي: ${JSON.stringify(subjects)}. اعملي جدول دراسي مريح بلهجة مصرية، ناديني باسمي، ووزع الصفحات بذكاء على الأيام.`;
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyCKpPdJmQUb_5Qr5HcLleZGdRm2hMVmg9I`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -170,7 +178,7 @@
                 const data = await res.json();
                 resBox.innerText = data.candidates[0].content.parts[0].text;
             } catch (e) {
-                resBox.innerText = "حصل ضغط على السيرفر، جرب تطلب الجدول تاني يا بطل!";
+                resBox.innerText = "الخدمة مشغولة، دوس تاني وهتشتغل فوراً!";
             }
         }
     </script>
