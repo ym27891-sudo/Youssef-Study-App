@@ -5,13 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المساعد الدراسي الذكي PRO 🎓</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         body { background: #f8fafc; font-family: 'Segoe UI', Tahoma, sans-serif; overflow-x: hidden; }
         .card { background: white; border-radius: 24px; padding: 1.5rem; transition: 0.3s; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
         .btn-main { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border-radius: 18px; padding: 1rem; font-weight: bold; transition: 0.2s; cursor: pointer; text-align: center; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center; }
-        .study-active { border: 4px solid #6366f1; animation: pulse border 2s infinite; }
+        .study-active { border: 4px solid #6366f1; animation: pulse-border 2s infinite; }
         .break-active { border: 4px solid #10b981; }
+        
+        /* ألوان الفريمات حسب الموعد */
+        .border-danger { border: 5px solid #ef4444 !important; } /* أحمر */
+        .border-warning { border: 5px solid #f97316 !important; } /* برتقالي */
+        .border-safe { border: 5px solid #a855f7 !important; }    /* بنفسجي */
+
         @keyframes pulse-border { 0% { border-color: #6366f1; } 50% { border-color: #a855f7; } 100% { border-color: #6366f1; } }
     </style>
 </head>
@@ -62,10 +69,10 @@
                 <h2 class="text-slate-800 font-black text-xl mb-6">➕ إضافة مادة للجدول</h2>
                 <div class="space-y-4">
                     <div class="relative">
-                        <input id="subName" type="text" placeholder="اسم المادة (محاسبة، إدارة..)" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-400 outline-none">
+                        <input id="subName" type="text" placeholder="اسم المادة" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-400 outline-none">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <input id="subPgs" type="number" placeholder="كم صفحة؟" class="p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-indigo-400">
+                        <input id="subPgs" type="number" placeholder="كم صفحة؟ (أقصى مادة 20)" class="p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-indigo-400">
                         <input id="subDate" type="date" class="p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-indigo-400 text-xs">
                     </div>
                     <button onclick="addSub()" class="btn-main w-full py-5 text-lg shadow-xl shadow-indigo-100">تثبيت في الجدول 📌</button>
@@ -78,12 +85,12 @@
                 📅 جدول موادك الدراسية
                 <span id="subCount" class="text-sm bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">0</span>
             </h2>
-            <div id="subjectsList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
-                </div>
+            <div id="subjectsList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20"></div>
         </div>
     </div>
 
     <audio id="bellSound" src="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3" loop></audio>
+    <audio id="cheerSound" src="https://assets.mixkit.co/active_storage/sfx/2020/2020-preview.mp3"></audio>
 
     <script>
         let user = JSON.parse(localStorage.getItem('study_user')) || null;
@@ -91,13 +98,7 @@
         let timerInterval, remainingTime, isBreak = false, currentIqAnswer = null;
         let activeSub = null;
 
-        window.onload = () => {
-            if (!user) {
-                document.getElementById('loginOverlay').classList.remove('hidden');
-            } else {
-                setupUser();
-            }
-        };
+        window.onload = () => { if (!user) document.getElementById('loginOverlay').classList.remove('hidden'); else setupUser(); };
 
         function login() {
             const name = document.getElementById('userNameInput').value;
@@ -114,23 +115,19 @@
             renderSubjects();
         }
 
-        function logout() {
-            localStorage.removeItem('study_user');
-            location.reload();
-        }
+        function logout() { localStorage.removeItem('study_user'); location.reload(); }
 
         function addSub() {
-            const n = document.getElementById('subName').value, p = document.getElementById('subPgs').value, d = document.getElementById('subDate').value;
+            const n = document.getElementById('subName').value, p = parseInt(document.getElementById('subPgs').value), d = document.getElementById('subDate').value;
             if(!n || !p || !d) return alert("كمل البيانات يا وحش!");
+            if(p > 20) return alert("يا بطل، أقصى مادة للمذاكرة هي 20 صفحة في اليوم عشان تركيزك ميقلش!");
+            
             subjects.push({ n, p, d, id: Date.now() });
             saveAndRender();
             document.getElementById('subName').value = ''; document.getElementById('subPgs').value = '';
         }
 
-        function saveAndRender() {
-            localStorage.setItem(`subs_${user.name}`, JSON.stringify(subjects));
-            renderSubjects();
-        }
+        function saveAndRender() { localStorage.setItem(`subs_${user.name}`, JSON.stringify(subjects)); renderSubjects(); }
 
         function renderSubjects() {
             const container = document.getElementById('subjectsList');
@@ -144,17 +141,18 @@
 
             subjects.forEach((s) => {
                 const days = Math.ceil((new Date(s.d) - new Date())/(1000*60*60*24));
+                let borderClass = "border-safe"; // بنفسجي افتراضي
+                if (days <= 3) borderClass = "border-danger"; // أحمر
+                else if (days <= 7) borderClass = "border-warning"; // برتقالي
+
                 container.innerHTML += `
-                    <div class="card border-r-8 border-indigo-500 hover:translate-y-[-5px] transition-all cursor-pointer group" onclick="startSubjectPlan(${s.id})">
+                    <div class="card ${borderClass} hover:translate-y-[-5px] transition-all cursor-pointer group" onclick="startSubjectPlan(${s.id})">
                         <div class="flex justify-between items-start mb-4">
                             <div>
                                 <h3 class="text-2xl font-black text-slate-800 group-hover:text-indigo-600 transition">${s.n}</h3>
-                                <p class="text-slate-400 font-bold text-sm">📅 باقي ${days > 0 ? days : 0} يوم على الامتحان</p>
+                                <p class="text-slate-400 font-bold text-sm">📅 باقي ${days > 0 ? days : 0} يوم</p>
                             </div>
                             <span class="bg-indigo-50 text-indigo-600 p-2 rounded-xl text-xs font-black">${s.p} صفحة</span>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl mb-4 text-xs text-slate-500 leading-relaxed">
-                            💡 **خطة الذكاء:** هنقسمها لـ ${Math.ceil(s.p/5)} جلسة مذاكرة ببريكات منتظمة.
                         </div>
                         <button onclick="event.stopPropagation(); finishSubject(${s.id})" class="w-full py-3 bg-green-50 text-green-600 rounded-xl font-bold hover:bg-green-600 hover:text-white transition">
                             أنا خلصت المادة دي ✅
@@ -164,29 +162,31 @@
         }
 
         function finishSubject(id) {
-            subjects = subjects.filter(s => s.id !== id);
-            saveAndRender();
+            // تأثير البلالين
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            // صوت التشجيع
+            document.getElementById('cheerSound').play();
+            
+            setTimeout(() => {
+                subjects = subjects.filter(s => s.id !== id);
+                saveAndRender();
+            }, 1000);
         }
 
-        // منطق المذاكرة والبريك الأوتوماتيكي
         function startSubjectPlan(id) {
             activeSub = subjects.find(s => s.id === id);
             isBreak = false;
-            remainingTime = 60 * 60; // نبدأ بـ ساعة مذاكرة (لـ 5 صفحات مثلاً)
+            remainingTime = 60 * 60;
             updateTimerDisplay();
-            document.getElementById('statusLabel').innerText = "وضع المذاكرة المستمرة 📖";
-            document.getElementById('sessionInfo').innerText = `المادة الحالية: ${activeSub.n} | ركز لإنهاء 5 صفحات`;
+            document.getElementById('statusLabel').innerText = "وضع المذاكرة 📖";
+            document.getElementById('sessionInfo').innerText = `المادة الحالية: ${activeSub.n}`;
             document.getElementById('timerCard').className = "card text-center flex flex-col justify-center relative overflow-hidden study-active";
-            alert(`يلا يا ${user.name}! الخطة بدأت: كل 5 صفحات هناخد بريك 15 دقيقة، وكل 10 صفحات بريك ساعة.`);
         }
 
         function toggleTimer() {
             const btn = document.getElementById('timerBtn');
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-                btn.innerText = "استكمال ▶️";
-            } else {
+            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; btn.innerText = "استكمال ▶️"; } 
+            else {
                 if(!remainingTime) return alert("اختر مادة أولاً");
                 btn.innerText = "إيقاف مؤقت ⏸️";
                 timerInterval = setInterval(() => {
@@ -194,7 +194,6 @@
                     updateTimerDisplay();
                     if(remainingTime <= 0) {
                         clearInterval(timerInterval);
-                        timerInterval = null;
                         document.getElementById('bellSound').play();
                         document.getElementById('stopBtn').classList.remove('hidden');
                         document.getElementById('timerBtn').classList.add('hidden');
@@ -208,10 +207,7 @@
             document.getElementById('timerDisp').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
-        function skipSession() {
-            if(!activeSub) return;
-            remainingTime = 1; // إنهاء الجلسة فوراً لتجربة المنبه
-        }
+        function skipSession() { if(!activeSub) return; remainingTime = 1; }
 
         function triggerAlarmStop() {
             const n1 = Math.floor(Math.random() * 30) + 10;
@@ -231,27 +227,20 @@
                 document.getElementById('timerBtn').classList.remove('hidden');
                 document.getElementById('iqAnswer').value = '';
                 nextPhase();
-            } else {
-                alert("غلط! ركز يا بطل المنبه مش هيسكت");
-            }
+            } else { alert("غلط! ركز يا بطل"); }
         }
 
         function nextPhase() {
             const timerCard = document.getElementById('timerCard');
             if(!isBreak) {
-                // خلص مذاكرة، نحدد نوع البريك
-                // افتراضياً: بريك 15 دقيقة
                 isBreak = true;
                 remainingTime = 15 * 60;
-                document.getElementById('statusLabel').innerText = "وقت البريك المستحق ☕";
-                document.getElementById('sessionInfo').innerText = "خد نفس عميق، البريك ده 15 دقيقة";
+                document.getElementById('statusLabel').innerText = "وقت البريك ☕";
                 timerCard.className = "card text-center flex flex-col justify-center relative overflow-hidden break-active";
             } else {
-                // خلص بريك، نرجع مذاكرة
                 isBreak = false;
                 remainingTime = 60 * 60;
-                document.getElementById('statusLabel').innerText = "رجعنا للجد يا بطل ✍️";
-                document.getElementById('sessionInfo').innerText = "الجولة القادمة: 5 صفحات كمان";
+                document.getElementById('statusLabel').innerText = "رجعنا للمذاكرة ✍️";
                 timerCard.className = "card text-center flex flex-col justify-center relative overflow-hidden study-active";
             }
             updateTimerDisplay();
