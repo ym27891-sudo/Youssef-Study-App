@@ -14,10 +14,10 @@
         .study-active { border: 4px solid #6366f1; animation: pulse-border 2s infinite; }
         .break-active { border: 4px solid #10b981; }
         
-        /* ألوان الفريمات حسب الموعد */
-        .border-danger { border: 5px solid #ef4444 !important; } /* أحمر */
-        .border-warning { border: 5px solid #f97316 !important; } /* برتقالي */
-        .border-safe { border: 5px solid #a855f7 !important; }    /* بنفسجي */
+        /* ألوان الفريمات حسب الأولوية */
+        .border-priority-1 { border: 6px solid #ef4444 !important; transform: scale(1.02); } /* أحمر للأقرب */
+        .border-priority-2 { border: 5px solid #f97316 !important; } /* برتقالي للي بعدها */
+        .border-priority-rest { border: 4px solid #a855f7 !important; opacity: 0.9; } /* بنفسجي للباقي */
 
         @keyframes pulse-border { 0% { border-color: #6366f1; } 50% { border-color: #a855f7; } 100% { border-color: #6366f1; } }
     </style>
@@ -28,7 +28,6 @@
         <div class="max-w-sm w-full text-center">
             <div class="text-6xl mb-6">🎓</div>
             <h2 class="text-3xl font-black text-slate-800 mb-2">أهلاً بك يا بطل!</h2>
-            <p class="text-slate-500 mb-8">دخل اسمك عشان نبدأ ننظم جدولك</p>
             <input id="userNameInput" type="text" placeholder="اكتب اسمك هنا..." class="w-full p-5 bg-slate-100 rounded-2xl mb-4 text-center text-xl outline-none focus:ring-4 focus:ring-indigo-200">
             <button onclick="login()" class="btn-main w-full py-5 text-xl">ابدأ رحلتك 🚀</button>
         </div>
@@ -37,7 +36,7 @@
     <div id="iqModal" class="modal">
         <div class="card w-full max-w-sm text-center border-4 border-red-500">
             <h2 class="text-2xl font-bold text-red-600 mb-4">⚠️ فك الشفرة عشان تقفل!</h2>
-            <p id="iqQuestion" class="text-3xl mb-6 font-black tracking-widest text-slate-800"></p>
+            <p id="iqQuestion" class="text-3xl mb-6 font-black text-slate-800"></p>
             <input id="iqAnswer" type="number" class="w-full p-4 bg-slate-100 rounded-2xl mb-4 text-center text-3xl font-bold">
             <button onclick="checkIQ()" class="btn-main w-full bg-red-600">تأكيد الإجابة ✅</button>
         </div>
@@ -56,11 +55,14 @@
             <div id="timerCard" class="card text-center flex flex-col justify-center relative overflow-hidden">
                 <div id="statusLabel" class="text-xs font-black uppercase tracking-widest text-indigo-500 mb-2">في انتظارك..</div>
                 <div id="timerDisp" class="text-8xl font-black text-slate-800 mb-8 tracking-tighter">00:00</div>
-                <div id="sessionInfo" class="text-slate-400 text-sm mb-6 font-bold">اختر مادة من الجدول تحت عشان نبدأ</div>
+                <div id="sessionInfo" class="text-slate-400 text-sm mb-6 font-bold leading-relaxed whitespace-pre-line">اختر مادة من الجدول تحت عشان نبدأ</div>
                 
-                <div class="flex gap-3">
-                    <button id="timerBtn" onclick="toggleTimer()" class="flex-[3] btn-main py-5 text-xl shadow-lg shadow-indigo-200">ابدأ الآن ▶️</button>
-                    <button onclick="skipSession()" class="flex-1 bg-slate-100 text-slate-500 rounded-2xl font-bold hover:bg-slate-200">تخطي ⏭️</button>
+                <div class="flex flex-col gap-3">
+                    <div class="flex gap-2">
+                        <button id="timerBtn" onclick="toggleTimer()" class="flex-[3] btn-main py-5 text-xl shadow-lg shadow-indigo-200">ابدأ الآن ▶️</button>
+                        <button onclick="skipSession()" class="flex-1 bg-slate-100 text-slate-500 rounded-2xl font-bold hover:bg-slate-200">تخطي ⏭️</button>
+                    </div>
+                    <button id="beBeastBtn" onclick="beBeast()" class="hidden w-full py-3 bg-orange-100 text-orange-600 rounded-xl font-black text-sm border-2 border-orange-300">أنا وحش وهقدر أذاكر أكتر من 20 صفحة! 🔥</button>
                 </div>
                 <button id="stopBtn" onclick="triggerAlarmStop()" class="hidden w-full mt-4 bg-red-600 text-white py-5 rounded-2xl font-black animate-pulse">إسكات الإنذار 🔕</button>
             </div>
@@ -68,11 +70,9 @@
             <div class="card border-t-6 border-indigo-400">
                 <h2 class="text-slate-800 font-black text-xl mb-6">➕ إضافة مادة للجدول</h2>
                 <div class="space-y-4">
-                    <div class="relative">
-                        <input id="subName" type="text" placeholder="اسم المادة" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-400 outline-none">
-                    </div>
+                    <input id="subName" type="text" placeholder="اسم المادة" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-400 outline-none">
                     <div class="grid grid-cols-2 gap-4">
-                        <input id="subPgs" type="number" placeholder="كم صفحة؟ (أقصى مادة 20)" class="p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-indigo-400">
+                        <input id="subPgs" type="number" placeholder="كم صفحة؟" class="p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-indigo-400">
                         <input id="subDate" type="date" class="p-5 bg-slate-50 rounded-2xl outline-none border-2 border-transparent focus:border-indigo-400 text-xs">
                     </div>
                     <button onclick="addSub()" class="btn-main w-full py-5 text-lg shadow-xl shadow-indigo-100">تثبيت في الجدول 📌</button>
@@ -81,10 +81,7 @@
         </div>
 
         <div class="w-full">
-            <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">
-                📅 جدول موادك الدراسية
-                <span id="subCount" class="text-sm bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">0</span>
-            </h2>
+            <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">📅 جدولك المرتب بالأولوية <span id="subCount" class="text-sm bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">0</span></h2>
             <div id="subjectsList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20"></div>
         </div>
     </div>
@@ -96,7 +93,7 @@
         let user = JSON.parse(localStorage.getItem('study_user')) || null;
         let subjects = [];
         let timerInterval, remainingTime, isBreak = false, currentIqAnswer = null;
-        let activeSub = null;
+        let activeSub = null, isBeastMode = false;
 
         window.onload = () => { if (!user) document.getElementById('loginOverlay').classList.remove('hidden'); else setupUser(); };
 
@@ -119,15 +116,18 @@
 
         function addSub() {
             const n = document.getElementById('subName').value, p = parseInt(document.getElementById('subPgs').value), d = document.getElementById('subDate').value;
-            if(!n || !p || !d) return alert("كمل البيانات يا وحش!");
-            if(p > 20) return alert("يا بطل، أقصى مادة للمذاكرة هي 20 صفحة في اليوم عشان تركيزك ميقلش!");
-            
+            if(!n || !p || !d) return alert("كمل البيانات!");
             subjects.push({ n, p, d, id: Date.now() });
             saveAndRender();
             document.getElementById('subName').value = ''; document.getElementById('subPgs').value = '';
         }
 
-        function saveAndRender() { localStorage.setItem(`subs_${user.name}`, JSON.stringify(subjects)); renderSubjects(); }
+        function saveAndRender() {
+            // ترتيب المواد حسب التاريخ (الأقرب أولاً)
+            subjects.sort((a, b) => new Date(a.d) - new Date(b.d));
+            localStorage.setItem(`subs_${user.name}`, JSON.stringify(subjects));
+            renderSubjects();
+        }
 
         function renderSubjects() {
             const container = document.getElementById('subjectsList');
@@ -135,18 +135,18 @@
             container.innerHTML = '';
             
             if(subjects.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center p-20 text-slate-400 font-bold border-4 border-dashed rounded-3xl">الجدول فاضي.. ضيف مادة عشان نبدأ!</div>`;
+                container.innerHTML = `<div class="col-span-full text-center p-20 text-slate-400 font-bold border-4 border-dashed rounded-3xl">الجدول فاضي.. ضيف مادة!</div>`;
                 return;
             }
 
-            subjects.forEach((s) => {
+            subjects.forEach((s, index) => {
                 const days = Math.ceil((new Date(s.d) - new Date())/(1000*60*60*24));
-                let borderClass = "border-safe"; // بنفسجي افتراضي
-                if (days <= 3) borderClass = "border-danger"; // أحمر
-                else if (days <= 7) borderClass = "border-warning"; // برتقالي
+                let priorityClass = "border-priority-rest"; // بنفسجي
+                if (index === 0) priorityClass = "border-priority-1"; // أحمر للأولى
+                else if (index === 1) priorityClass = "border-priority-2"; // برتقالي للثانية
 
                 container.innerHTML += `
-                    <div class="card ${borderClass} hover:translate-y-[-5px] transition-all cursor-pointer group" onclick="startSubjectPlan(${s.id})">
+                    <div class="card ${priorityClass} hover:translate-y-[-5px] transition-all cursor-pointer group" onclick="startSubjectPlan(${s.id})">
                         <div class="flex justify-between items-start mb-4">
                             <div>
                                 <h3 class="text-2xl font-black text-slate-800 group-hover:text-indigo-600 transition">${s.n}</h3>
@@ -161,26 +161,43 @@
             });
         }
 
-        function finishSubject(id) {
-            // تأثير البلالين
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            // صوت التشجيع
-            document.getElementById('cheerSound').play();
-            
-            setTimeout(() => {
-                subjects = subjects.filter(s => s.id !== id);
-                saveAndRender();
-            }, 1000);
+        function beBeast() {
+            isBeastMode = true;
+            document.getElementById('beBeastBtn').classList.add('hidden');
+            startSubjectPlan(activeSub.id);
+            alert("وحش يا يوسف! كسرنا القاعدة، هنخلص المادة كلها النهاردة!");
         }
 
         function startSubjectPlan(id) {
             activeSub = subjects.find(s => s.id === id);
             isBreak = false;
-            remainingTime = 60 * 60;
+            
+            let pagesToStudy = activeSub.p;
+            let infoText = `المادة الحالية: ${activeSub.n}`;
+            
+            if (pagesToStudy > 20 && !isBeastMode) {
+                pagesToStudy = 20;
+                infoText += `\n⚠️ تنبيه: هنذاكر 20 صفحة بس النهاردة والباقي يترحل.\nعشان تركيزك يفضل توب!`;
+                document.getElementById('beBeastBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('beBeastBtn').classList.add('hidden');
+            }
+
+            remainingTime = 60 * 60; // جلسة مذاكرة ساعة
             updateTimerDisplay();
             document.getElementById('statusLabel').innerText = "وضع المذاكرة 📖";
-            document.getElementById('sessionInfo').innerText = `المادة الحالية: ${activeSub.n}`;
+            document.getElementById('sessionInfo').innerText = infoText;
             document.getElementById('timerCard').className = "card text-center flex flex-col justify-center relative overflow-hidden study-active";
+        }
+
+        function finishSubject(id) {
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            document.getElementById('cheerSound').play();
+            setTimeout(() => {
+                subjects = subjects.filter(s => s.id !== id);
+                isBeastMode = false;
+                saveAndRender();
+            }, 1000);
         }
 
         function toggleTimer() {
@@ -210,16 +227,14 @@
         function skipSession() { if(!activeSub) return; remainingTime = 1; }
 
         function triggerAlarmStop() {
-            const n1 = Math.floor(Math.random() * 30) + 10;
-            const n2 = Math.floor(Math.random() * 30) + 10;
+            const n1 = Math.floor(Math.random() * 30) + 10, n2 = Math.floor(Math.random() * 30) + 10;
             currentIqAnswer = n1 + n2;
             document.getElementById('iqQuestion').innerText = `${n1} + ${n2}`;
             document.getElementById('iqModal').style.display = 'flex';
         }
 
         function checkIQ() {
-            const ans = document.getElementById('iqAnswer').value;
-            if(parseInt(ans) === currentIqAnswer) {
+            if(parseInt(document.getElementById('iqAnswer').value) === currentIqAnswer) {
                 document.getElementById('bellSound').pause();
                 document.getElementById('bellSound').currentTime = 0;
                 document.getElementById('iqModal').style.display = 'none';
@@ -227,19 +242,17 @@
                 document.getElementById('timerBtn').classList.remove('hidden');
                 document.getElementById('iqAnswer').value = '';
                 nextPhase();
-            } else { alert("غلط! ركز يا بطل"); }
+            } else { alert("غلط! ركز"); }
         }
 
         function nextPhase() {
             const timerCard = document.getElementById('timerCard');
             if(!isBreak) {
-                isBreak = true;
-                remainingTime = 15 * 60;
+                isBreak = true; remainingTime = 15 * 60;
                 document.getElementById('statusLabel').innerText = "وقت البريك ☕";
                 timerCard.className = "card text-center flex flex-col justify-center relative overflow-hidden break-active";
             } else {
-                isBreak = false;
-                remainingTime = 60 * 60;
+                isBreak = false; remainingTime = 60 * 60;
                 document.getElementById('statusLabel').innerText = "رجعنا للمذاكرة ✍️";
                 timerCard.className = "card text-center flex flex-col justify-center relative overflow-hidden study-active";
             }
