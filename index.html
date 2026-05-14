@@ -3,140 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المساعد الدراسي الذكي Pro</title>
+    <title>مساعد يوسف الذكي 🎓</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; }
-        .card { background: white; border-radius: 24px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1); border-top: 6px solid #6366f1; transition: 0.3s; }
-        .btn-grad { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; transition: 0.2s; cursor: pointer; border: none; }
-        .btn-grad:hover { opacity: 0.9; transform: translateY(-2px); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 200; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 2rem; border-radius: 30px; width: 90%; max-width: 400px; animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .pulse-timer { animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        body { background: #f1f5f9; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .card { background: white; border-radius: 24px; padding: 1.5rem; border-top: 6px solid #6366f1; transition: 0.3s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .btn-action { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border-radius: 16px; padding: 1rem; font-weight: bold; transition: 0.2s; cursor: pointer; text-align: center; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; }
+        .iq-box { animation: shake 0.5s infinite; border: 4px solid #ef4444; }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(5px); } 50% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
     </style>
 </head>
-<body class="p-4 bg-slate-50">
+<body class="p-4 md:p-8">
 
-    <div id="loginOverlay" class="fixed inset-0 bg-slate-50 flex items-center justify-center p-6 z-[300] hidden">
-        <div class="card p-8 w-full max-w-md text-center">
-            <h2 class="text-2xl font-bold mb-6 text-slate-800">أهلاً بك يا بطل! 🎓</h2>
-            <input id="userName" type="text" placeholder="اسمك الكريم" class="w-full p-4 mb-3 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-400">
-            <button onclick="saveUser()" class="btn-grad w-full py-4 rounded-2xl text-lg font-bold">دخول 🚀</button>
+    <div id="iqModal" class="modal">
+        <div class="card w-full max-w-sm text-center iq-box">
+            <h2 class="text-2xl font-bold text-red-600 mb-4">⚠️ اختبار يقظة!</h2>
+            <p id="iqQuestion" class="text-xl mb-6 font-black"></p>
+            <input id="iqAnswer" type="number" placeholder="الإجابة هنا" class="w-full p-4 border rounded-2xl mb-4 text-center text-2xl">
+            <button onclick="checkIQ()" class="btn-action w-full">أنا صاحي ومركز! ✅</button>
         </div>
     </div>
 
     <div id="subModal" class="modal">
-        <div class="modal-content text-center">
-            <div class="text-4xl mb-4 text-indigo-500 font-bold" id="modalSubName"></div>
-            <p class="text-slate-500 mb-6 text-sm">عايز تخطط لمذاكرة المادة دي إزاي؟</p>
-            <div class="space-y-3">
-                <button onclick="getSpecificAI('today')" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200">النهاردة فقط (خطة بالساعات) 🔥</button>
-                <button onclick="getSpecificAI('longterm')" class="w-full py-4 bg-slate-100 text-slate-700 rounded-2xl font-bold">على مدار الأيام المتبقية 📅</button>
-                <button onclick="closeModal()" class="text-slate-400 text-sm mt-4 inline-block">إلغاء</button>
+        <div class="card w-full max-w-md text-center">
+            <div class="text-4xl mb-2">⚡</div>
+            <h3 id="modalSubName" class="text-2xl font-bold text-indigo-600"></h3>
+            <p class="text-slate-500 mb-6 italic">الذكاء المدمج جاهز للتخطيط...</p>
+            <div class="space-y-4">
+                <button onclick="autoPlan('today')" class="btn-action w-full bg-indigo-600">خطة مذاكرة "النهاردة" (بالساعة) 🔥</button>
+                <button onclick="autoPlan('long')" class="btn-action w-full bg-slate-800 text-white">توزيع على باقي الأيام 📅</button>
+                <button onclick="closeModal()" class="text-slate-400 font-bold">إلغاء</button>
             </div>
+            <div id="planResult" class="mt-6 p-4 bg-indigo-50 rounded-2xl text-right text-sm leading-relaxed hidden border border-indigo-100"></div>
         </div>
     </div>
 
-    <div class="max-w-md mx-auto">
-        <header class="text-center mb-6">
-            <h1 class="text-3xl font-black text-slate-800 tracking-tight">المساعد الذكي</h1>
-            <p id="welcomeMsg" class="text-indigo-600 font-bold mt-1 text-sm"></p>
+    <div class="max-w-6xl mx-auto">
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-3xl font-black text-slate-800">مساعد يوسف <span class="text-indigo-600">PRO</span></h1>
+                <p id="welcomeMsg" class="text-slate-500 font-bold"></p>
+            </div>
+            <div class="text-4xl">🎓</div>
         </header>
 
-        <div class="card p-6 text-center mb-6 relative overflow-hidden">
-            <div id="alarmStatus" class="hidden absolute top-2 right-2 text-red-500 font-bold text-[10px] pulse-timer">ALARM ON!</div>
-            <div class="flex justify-center items-center gap-2 mb-4">
-                <input id="customMinutes" type="number" value="25" class="w-16 p-2 text-center bg-slate-50 border rounded-xl text-lg font-black text-indigo-600">
-                <span class="text-slate-400 font-bold text-xs">دقيقة</span>
-            </div>
-            <div id="timerDisp" class="text-6xl font-black text-slate-800 mb-6">25:00</div>
-            <div class="flex gap-2">
-                <button id="timerBtn" onclick="toggleTimer()" class="flex-[2] py-4 bg-slate-800 text-white rounded-2xl font-bold">ابدأ ▶️</button>
-                <button onclick="stopAlarm()" id="stopAlarmBtn" class="flex-[2] py-4 bg-red-500 text-white rounded-2xl font-bold hidden pulse-timer text-sm">إسكات الإنذار 🔕</button>
-                <button onclick="resetTimer()" class="flex-1 py-4 bg-slate-100 text-slate-400 rounded-2xl font-bold">🔄</button>
-            </div>
-        </div>
-
-        <div class="card p-6 mb-6">
-            <h2 class="font-bold text-slate-700 mb-4 flex items-center gap-2 text-sm"><span>📦</span> مادة جديدة</h2>
-            <div class="space-y-3">
-                <input id="subName" type="text" placeholder="اسم المادة" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-400 border-none">
-                <div class="flex gap-2">
-                    <input id="subPgs" type="number" placeholder="صفحات" class="w-1/2 p-4 bg-slate-50 rounded-2xl outline-none border-none">
-                    <input id="subDate" type="date" class="w-1/2 p-4 bg-slate-50 rounded-2xl outline-none border-none text-xs">
+        <div class="dashboard-grid">
+            <div class="card flex flex-col justify-center text-center">
+                <h2 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-4">تركيزك الحالي</h2>
+                <div class="flex items-center justify-center gap-4 mb-6">
+                    <input id="customMin" type="number" value="25" class="w-20 p-3 text-center bg-slate-100 rounded-2xl text-2xl font-black text-indigo-600">
+                    <span class="font-bold text-slate-500">دقيقة</span>
                 </div>
-                <button onclick="addSub()" class="btn-grad w-full py-4 rounded-2xl font-bold shadow-lg">إضافة ➕</button>
+                <div id="timerDisp" class="text-7xl font-black text-slate-800 mb-8">25:00</div>
+                <div class="flex gap-2">
+                    <button id="timerBtn" onclick="toggleTimer()" class="flex-[2] btn-action">ابدأ ▶️</button>
+                    <button onclick="resetTimer()" class="flex-1 bg-slate-100 rounded-2xl font-bold text-slate-400">🔄</button>
+                </div>
+                <button id="stopBtn" onclick="stopAlarm()" class="hidden w-full mt-2 bg-red-600 text-white py-4 rounded-2xl font-bold animate-bounce">إيقاف الإنذار 🔕</button>
+            </div>
+
+            <div class="card">
+                <h2 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6 tracking-widest">إضافة مادة</h2>
+                <div class="space-y-4">
+                    <input id="subName" type="text" placeholder="اسم المادة" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-400">
+                    <div class="flex gap-2">
+                        <input id="subPgs" type="number" placeholder="عدد الصفحات" class="w-1/2 p-4 bg-slate-50 rounded-2xl">
+                        <input id="subDate" type="date" class="w-1/2 p-4 bg-slate-50 rounded-2xl text-xs">
+                    </div>
+                    <button onclick="addSub()" class="btn-action w-full">إضافة للمخزن 📦</button>
+                </div>
+            </div>
+
+            <div class="card md:col-span-2 lg:col-span-1">
+                <h2 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6">المواد المسجلة (اضغط للتخطيط)</h2>
+                <div id="subjectsList" class="space-y-3 max-h-[300px] overflow-y-auto pr-2"></div>
             </div>
         </div>
-
-        <div class="card p-6 bg-indigo-50 border-indigo-200">
-            <h2 class="font-bold text-indigo-900 mb-2 flex items-center gap-2">🪄 عبقري Gemini</h2>
-            <p class="text-[10px] text-indigo-600 mb-4">اضغط على المادة عشان يخطط لها لوحدها، أو اطلب جدول لكل المواد:</p>
-            <button onclick="getSpecificAI('general')" class="w-full py-3 bg-white text-indigo-600 border-2 border-indigo-200 rounded-xl font-black shadow-sm">جدول شامل لكل المواد 🚀</button>
-            <div id="aiResponse" class="mt-4 text-xs leading-relaxed text-slate-700 bg-white p-4 rounded-2xl border border-indigo-100 hidden shadow-inner max-h-80 overflow-y-auto"></div>
-        </div>
-
-        <div id="subjectsList" class="mt-6 space-y-3 pb-20"></div>
     </div>
 
     <audio id="bellSound" src="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3" loop></audio>
 
     <script>
-        let currentUser = JSON.parse(localStorage.getItem('study_pro_user'));
-        let subjects = JSON.parse(localStorage.getItem('study_pro_subs')) || [];
+        let subjects = JSON.parse(localStorage.getItem('y_pro_subs')) || [];
         let timerInterval, remainingTime, selectedSubIndex = null;
+        let currentIqAnswer = null;
 
-        window.onload = () => { if (!currentUser) document.getElementById('loginOverlay').classList.remove('hidden'); else showMain(); };
-
-        function saveUser() {
-            const name = document.getElementById('userName').value;
-            if (!name) return alert('اسمك إيه يا بطل؟');
-            currentUser = { name };
-            localStorage.setItem('study_pro_user', JSON.stringify(currentUser));
-            document.getElementById('loginOverlay').classList.add('hidden');
-            showMain();
-        }
-
-        function showMain() {
-            document.getElementById('welcomeMsg').innerText = `منور يا ${currentUser.name.split(' ')[0]} 👋`;
+        window.onload = () => { 
+            document.getElementById('welcomeMsg').innerText = "جاهز تفرتك الكتب يا بطل؟ 🔥";
             renderSubjects();
-        }
+            setInterval(triggerIQ, 600000); // سؤال كل 10 دقائق
+        };
 
         function addSub() {
             const n = document.getElementById('subName').value, p = document.getElementById('subPgs').value, d = document.getElementById('subDate').value;
-            if (!n || !p || !d) return alert('كمل البيانات!');
+            if(!n || !p || !d) return alert('كمل البيانات يا وحش!');
             subjects.push({ n, p, d });
-            localStorage.setItem('study_pro_subs', JSON.stringify(subjects));
-            document.getElementById('subName').value = ''; document.getElementById('subPgs').value = '';
+            localStorage.setItem('y_pro_subs', JSON.stringify(subjects));
             renderSubjects();
         }
 
         function renderSubjects() {
             const container = document.getElementById('subjectsList');
-            container.innerHTML = subjects.length > 0 ? '<h3 class="font-bold text-slate-400 text-[10px] mb-2 uppercase tracking-widest">اضغط على المادة للتخطيط</h3>' : '';
+            container.innerHTML = '';
             subjects.forEach((s, i) => {
-                const days = Math.ceil((new Date(s.d) - new Date()) / (1000 * 60 * 60 * 24));
+                const days = Math.ceil((new Date(s.d) - new Date())/(1000*60*60*24));
                 container.innerHTML += `
-                    <div onclick="openModal(${i})" class="card p-4 border-t-0 border-r-8 border-indigo-500 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition">
-                        <div>
-                            <b class="text-slate-800">${s.n}</b>
-                            <p class="text-[10px] text-slate-400">${s.p} صفحة • باقي ${days > 0 ? days : 0} يوم</p>
-                        </div>
-                        <button onclick="event.stopPropagation(); removeSub(${i})" class="text-red-300 text-xs">✕</button>
+                    <div onclick="openModal(${i})" class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center cursor-pointer hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition">
+                        <div><b class="text-slate-800">${s.n}</b><p class="text-[10px] text-slate-400 uppercase">${s.p} صفحة • باقي ${days > 0 ? days : 0} يوم</p></div>
+                        <button onclick="event.stopPropagation(); removeSub(${i})" class="text-red-400 text-xs font-bold">حذف</button>
                     </div>`;
             });
         }
 
-        function openModal(i) { selectedSubIndex = i; document.getElementById('modalSubName').innerText = subjects[i].n; document.getElementById('subModal').style.display = 'flex'; }
+        function openModal(i) { selectedSubIndex = i; document.getElementById('modalSubName').innerText = subjects[i].n; document.getElementById('subModal').style.display = 'flex'; document.getElementById('planResult').classList.add('hidden'); }
         function closeModal() { document.getElementById('subModal').style.display = 'none'; }
-        function removeSub(i) { subjects.splice(i, 1); localStorage.setItem('study_pro_subs', JSON.stringify(subjects)); renderSubjects(); }
+        function removeSub(i) { subjects.splice(i, 1); localStorage.setItem('y_pro_subs', JSON.stringify(subjects)); renderSubjects(); }
 
-        // المنبه
+        // التخطيط الأوتوماتيكي البديل لـ Gemini
+        function autoPlan(type) {
+            const s = subjects[selectedSubIndex];
+            const result = document.getElementById('planResult');
+            result.classList.remove('hidden');
+            let text = "";
+
+            if (type === 'today') {
+                const hoursNeeded = (s.p / 10).toFixed(1);
+                text = `💡 **خطة النهاردة:**\nعشان تخلص الـ ${s.p} صفحة، محتاج حوالي ${hoursNeeded} ساعة مذاكرة صافية.\n- ابدأ الساعة 4:00 عصراً.\n- ذاكر 50 دقيقة وخد 10 دقائق بريك.\n- خلص أول 20 صفحة قبل المغرب.`;
+            } else {
+                const days = Math.ceil((new Date(s.d) - new Date())/(1000*60*60*24));
+                const pgsPerDay = Math.ceil(s.p / (days > 0 ? days : 1));
+                text = `📅 **خطة الأيام المتبقية:**\nباقي ${days} يوم. عشان تذاكر بذكاء، خلص **${pgsPerDay} صفحة يومياً**.\nالأولوية دلوقتى تخلص الأجزاء الصعبة الأول وسيب المراجعة لآخر يومين.`;
+            }
+            result.innerText = text;
+        }
+
+        // المنبه المزعج
         function toggleTimer() {
             const btn = document.getElementById('timerBtn');
-            const customMin = document.getElementById('customMinutes').value;
+            const customMin = document.getElementById('customMin').value;
             if (timerInterval) { clearInterval(timerInterval); timerInterval = null; btn.innerText = "استكمال ▶️"; }
             else {
                 if (!remainingTime) remainingTime = customMin * 60;
@@ -148,56 +155,43 @@
                     if (remainingTime <= 0) { 
                         clearInterval(timerInterval);
                         document.getElementById('bellSound').play(); 
-                        document.getElementById('stopAlarmBtn').classList.remove('hidden');
+                        document.getElementById('stopBtn').classList.remove('hidden');
                         document.getElementById('timerBtn').classList.add('hidden');
-                        document.getElementById('alarmStatus').classList.remove('hidden');
                     }
                 }, 1000);
             }
         }
+
         function stopAlarm() { 
-            const alarm = document.getElementById('bellSound'); alarm.pause(); alarm.currentTime = 0;
-            document.getElementById('stopAlarmBtn').classList.add('hidden');
-            document.getElementById('timerBtn').classList.remove('hidden');
-            document.getElementById('alarmStatus').classList.add('hidden');
-            resetTimer();
-        }
-        function resetTimer() { 
-            clearInterval(timerInterval); timerInterval = null; remainingTime = null; 
-            const customMin = document.getElementById('customMinutes').value;
-            document.getElementById('timerDisp').innerText = `${customMin}:00`; 
-            document.getElementById('timerBtn').innerText = "ابدأ ▶️"; 
+            // المنبه مش هيسكت غير لما يحل سؤال الـ IQ لو اشتغل
+            triggerIQ(); 
         }
 
-        // Gemini AI PRO - Updated with better error handling
-        async function getSpecificAI(type) {
-            closeModal();
-            const resBox = document.getElementById('aiResponse');
-            resBox.classList.remove('hidden');
-            resBox.innerText = "جاري الاتصال بـ Gemini... خليك بطل وانتظر ثواني 🧠";
-            
-            let prompt = "";
-            if (type === 'today') {
-                const s = subjects[selectedSubIndex];
-                prompt = `أنا اسمي ${currentUser.name}. عايز أذاكر مادة "${s.n}" اللي فيها ${s.p} صفحة النهاردة بس. اعملي جدول بالساعات لليوم ده، قولي أبدأ الساعة كام وأذاكر كام صفحة وأخد بريك قد إيه. بلهجة مصرية تشجيعية.`;
-            } else if (type === 'longterm') {
-                const s = subjects[selectedSubIndex];
-                prompt = `أنا ${currentUser.name}. عندي مادة "${s.n}" فيها ${s.p} صفحة وامتحاني كمان ${Math.ceil((new Date(s.d) - new Date())/(1000*60*60*24))} يوم. وزعلي المادة دي على الأيام بذكاء. بلهجة مصرية.`;
+        function resetTimer() { clearInterval(timerInterval); timerInterval = null; remainingTime = null; const customMin = document.getElementById('customMin').value; document.getElementById('timerDisp').innerText = `${customMin}:00`; }
+
+        // نظام الـ IQ المفاجئ
+        function triggerIQ() {
+            const n1 = Math.floor(Math.random() * 20) + 5;
+            const n2 = Math.floor(Math.random() * 20) + 5;
+            currentIqAnswer = n1 + n2;
+            document.getElementById('iqQuestion').innerText = `${n1} + ${n2} = ؟`;
+            document.getElementById('iqModal').style.display = 'flex';
+        }
+
+        function checkIQ() {
+            const ans = document.getElementById('iqAnswer').value;
+            if(parseInt(ans) === currentIqAnswer) {
+                const alarm = document.getElementById('bellSound');
+                alarm.pause(); alarm.currentTime = 0;
+                document.getElementById('iqModal').style.display = 'none';
+                document.getElementById('stopBtn').classList.add('hidden');
+                document.getElementById('timerBtn').classList.remove('hidden');
+                document.getElementById('iqAnswer').value = '';
+                resetTimer();
+                alert("برافو يا يوسف! كدة اتأكدت إنك لسه فايق.");
             } else {
-                prompt = `أنا ${currentUser.name}. عندي المواد دي: ${JSON.stringify(subjects)}. اعملي جدول شامل يراعي الامتحانات القريبة. بلهجة مصرية.`;
+                alert("إجابة غلط! ركز وصفي ذهنك، المنبه مش هيسكت.");
             }
-
-            try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyCKpPdJmQUb_5Qr5HcLleZGdRm2hMVmg9I`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-                const data = await res.json();
-                if(data.candidates) {
-                    resBox.innerText = data.candidates[0].content.parts[0].text;
-                    resBox.scrollIntoView({ behavior: 'smooth' });
-                } else { throw new Error(); }
-            } catch (e) { resBox.innerText = "الخدمة عليها ضغط يا يوسف، دوس تاني وهتشتغل فوراً!"; }
         }
     </script>
 </body>
