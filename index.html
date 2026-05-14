@@ -3,183 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المساعد الدراسي الذكي</title>
+    <title>المساعد الدراسي الذكي Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #f0f4f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: 0.3s; }
-        .card { background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 5px solid #667eea; margin-bottom: 20px; }
-        .btn-grad { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; transition: 0.3s; cursor: pointer; }
-        .btn-grad:active { transform: scale(0.95); }
-        #loginOverlay { background: rgba(240, 244, 248, 0.98); z-index: 100; }
+        body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; }
+        .card { background: white; border-radius: 24px; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1); border-top: 6px solid #6366f1; transition: 0.3s; }
+        .btn-grad { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; transition: 0.2s; cursor: pointer; border: none; }
+        .btn-grad:hover { opacity: 0.9; transform: translateY(-2px); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 200; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 2rem; border-radius: 30px; width: 90%; max-width: 400px; animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .pulse-timer { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
-<body class="p-4">
+<body class="p-4 bg-slate-50">
 
-    <!-- شاشة تسجيل الدخول -->
-    <div id="loginOverlay" class="fixed inset-0 flex items-center justify-center p-6 hidden">
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-50 flex items-center justify-center p-6 z-[300] hidden">
         <div class="card p-8 w-full max-w-md text-center">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800">أهلاً بك في مساعدك الذكي 🎓</h2>
-            <input id="userName" type="text" placeholder="اكتب اسمك هنا" class="w-full p-4 mb-3 border rounded-xl outline-none focus:ring-2 focus:ring-purple-400">
-            <input id="userEmail" type="email" placeholder="بريدك الإلكتروني" class="w-full p-4 mb-6 border rounded-xl outline-none focus:ring-2 focus:ring-purple-400">
-            <button onclick="saveUser()" class="btn-grad w-full py-4 rounded-xl text-lg shadow-lg">دخول 🚀</button>
+            <div class="text-5xl mb-4">👨‍🎓</div>
+            <h2 class="text-2xl font-bold mb-6 text-slate-800">أهلاً بك يا بطل!</h2>
+            <input id="userName" type="text" placeholder="اسمك الكريم" class="w-full p-4 mb-3 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-400">
+            <button onclick="saveUser()" class="btn-grad w-full py-4 rounded-2xl text-lg font-bold">ابدأ رحلة النجاح 🚀</button>
         </div>
     </div>
 
-    <div id="mainContent" class="max-w-md mx-auto">
-        <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">🎓 المساعد الدراسي الذكي</h1>
-        <p id="welcomeMsg" class="text-center text-purple-600 font-medium mb-6"></p>
-        
-        <!-- إضافة مادة -->
-        <div class="card p-6">
-            <h2 class="font-bold mb-4 text-gray-700">📦 إضافة مادة جديدة</h2>
-            <input id="subName" type="text" placeholder="اسم المادة" class="w-full p-3 mb-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
-            <input id="subPgs" type="number" placeholder="عدد الصفحات" class="w-full p-3 mb-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
-            <input id="subDate" type="date" class="w-full p-3 mb-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
-            <button onclick="addSub()" class="btn-grad w-full py-3 rounded-xl shadow-md">إضافة للمخزن ➕</button>
-        </div>
-
-        <!-- منبه التركيز المعدل -->
-        <div class="card p-6 text-center">
-            <h2 class="font-bold mb-2 text-gray-700">⏱️ منبه التركيز</h2>
-            <div class="flex justify-center items-center gap-2 mb-4">
-                <input id="customMinutes" type="number" value="25" class="w-16 p-2 text-center border rounded-lg text-lg font-bold text-blue-600">
-                <span class="text-gray-500">دقيقة</span>
-            </div>
-            <div id="timerDisp" class="text-6xl font-bold text-blue-600 mb-4">25:00</div>
-            <div class="flex gap-2">
-                <button id="timerBtn" onclick="toggleTimer()" class="flex-1 bg-green-500 text-white py-3 rounded-xl font-bold shadow-md">ابدأ ▶️</button>
-                <button onclick="resetTimer()" class="bg-gray-200 text-gray-600 px-4 py-3 rounded-xl font-bold">إعادة 🔄</button>
+    <div id="subModal" class="modal">
+        <div class="modal-content text-center">
+            <div class="text-4xl mb-4">🎯</div>
+            <h3 id="modalSubName" class="text-xl font-bold mb-2">اسم المادة</h3>
+            <p class="text-slate-500 mb-6 text-sm">عايز تخطط لمذاكرة المادة دي إزاي؟</p>
+            <div class="space-y-3">
+                <button onclick="getSpecificAI('today')" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200">النهاردة فقط (خطة مكثفة) 🔥</button>
+                <button onclick="getSpecificAI('longterm')" class="w-full py-4 bg-slate-100 text-slate-700 rounded-2xl font-bold">على مدار الأيام المتبقية 📅</button>
+                <button onclick="closeModal()" class="text-slate-400 text-sm mt-4">إلغاء</button>
             </div>
         </div>
-
-        <!-- استشارة Gemini -->
-        <div class="card p-6 border-t-5 border-purple-500 bg-purple-50">
-            <h2 class="font-bold mb-2 text-purple-800 flex items-center justify-center">✨ ذكاء Gemini الاصطناعي</h2>
-            <button onclick="getAISchedule()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg">اطلب جدولك الدراسي الآن 🪄</button>
-            <div id="aiResponse" class="mt-4 text-gray-800 text-sm leading-relaxed whitespace-pre-line bg-white p-4 rounded-xl border border-purple-200 hidden shadow-md"></div>
-        </div>
-
-        <!-- قائمة المواد -->
-        <div id="subjectsList" class="space-y-4 pb-12"></div>
     </div>
 
-    <!-- صوت التنبيه -->
-    <audio id="bellSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <div class="max-w-md mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-black text-slate-800">المساعد الذكي</h1>
+            <p id="welcomeMsg" class="text-indigo-600 font-bold mt-2"></p>
+        </header>
+
+        <div class="card p-6 text-center mb-6 relative overflow-hidden">
+            <div id="alarmStatus" class="hidden absolute top-2 right-2 text-red-500 font-bold text-[10px] uppercase pulse-timer">Alarm Active!</div>
+            <h2 class="text-slate-500 font-bold mb-4 uppercase text-xs tracking-widest">منبه التركيز</h2>
+            <div id="timerDisp" class="text-6xl font-black text-slate-800 mb-6">25:00</div>
+            <div class="flex gap-3">
+                <button id="timerBtn" onclick="toggleTimer()" class="flex-[2] py-4 bg-slate-800 text-white rounded-2xl font-bold shadow-xl">ابدأ الجلسة ▶️</button>
+                <button onclick="stopAlarm()" id="stopAlarmBtn" class="flex-1 py-4 bg-red-100 text-red-600 rounded-2xl font-bold hidden">إسكات 🔕</button>
+                <button onclick="resetTimer()" class="flex-1 py-4 bg-slate-100 text-slate-400 rounded-2xl font-bold">🔄</button>
+            </div>
+        </div>
+
+        <div class="card p-6 mb-6">
+            <h2 class="font-bold text-slate-700 mb-4 flex items-center gap-2"><span>📦</span> إضافة مادة جديدة</h2>
+            <div class="space-y-3">
+                <input id="subName" type="text" placeholder="اسم المادة" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-400 border-none">
+                <div class="flex gap-2">
+                    <input id="subPgs" type="number" placeholder="صفحات" class="w-1/2 p-4 bg-slate-50 rounded-2xl outline-none border-none">
+                    <input id="subDate" type="date" class="w-1/2 p-4 bg-slate-50 rounded-2xl outline-none border-none text-xs">
+                </div>
+                <button onclick="addSub()" class="btn-grad w-full py-4 rounded-2xl font-bold shadow-lg">إضافة للمخزن ➕</button>
+            </div>
+        </div>
+
+        <div class="card p-6 bg-indigo-50 border-indigo-200">
+            <h2 class="font-bold text-indigo-900 mb-2">🪄 عبقري Gemini</h2>
+            <p class="text-xs text-indigo-600 mb-4">اضغط على أي مادة تحت عشان أعملك خطة مخصصة ليها، أو اطلب جدول عام لكل المواد:</p>
+            <button onclick="getSpecificAI('general')" class="w-full py-3 bg-white text-indigo-600 border-2 border-indigo-200 rounded-xl font-black">جدول شامل لكل المواد 🚀</button>
+            <div id="aiResponse" class="mt-4 text-sm leading-relaxed text-slate-700 bg-white p-4 rounded-2xl border border-indigo-100 hidden shadow-inner max-h-60 overflow-y-auto"></div>
+        </div>
+
+        <div id="subjectsList" class="mt-8 space-y-4 pb-20"></div>
+    </div>
+
+    <audio id="bellSound" src="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3" loop></audio>
 
     <script>
-        let currentUser = JSON.parse(localStorage.getItem('study_user'));
-        let subjects = JSON.parse(localStorage.getItem('study_subs')) || [];
-        let timerInterval;
-        let remainingTime;
+        let currentUser = JSON.parse(localStorage.getItem('study_pro_user'));
+        let subjects = JSON.parse(localStorage.getItem('study_pro_subs')) || [];
+        let timerInterval, remainingTime, selectedSubIndex = null;
 
-        window.onload = () => {
-            if (!currentUser) {
-                document.getElementById('loginOverlay').classList.remove('hidden');
-            } else {
-                showMain();
-            }
-        };
+        window.onload = () => { if (!currentUser) document.getElementById('loginOverlay').classList.remove('hidden'); else showMain(); };
 
         function saveUser() {
             const name = document.getElementById('userName').value;
-            const email = document.getElementById('userEmail').value;
-            if (!name || !email) return alert('يا بطل دخل اسمك وإيميلك!');
-            currentUser = { name, email };
-            localStorage.setItem('study_user', JSON.stringify(currentUser));
+            if (!name) return alert('اسمك إيه يا بطل؟');
+            currentUser = { name };
+            localStorage.setItem('study_pro_user', JSON.stringify(currentUser));
             document.getElementById('loginOverlay').classList.add('hidden');
             showMain();
         }
 
         function showMain() {
-            document.getElementById('welcomeMsg').innerText = `يا أهلاً بك يا ${currentUser.name.split(' ')[0]} 👋`;
+            document.getElementById('welcomeMsg').innerText = `جاهز للتركيز يا ${currentUser.name.split(' ')[0]}؟ 🔥`;
             renderSubjects();
         }
 
         function addSub() {
             const n = document.getElementById('subName').value, p = document.getElementById('subPgs').value, d = document.getElementById('subDate').value;
-            if (!n || !p || !d) return alert('كمل البيانات يا بطل!');
+            if (!n || !p || !d) return alert('كمل البيانات عشان أساعدك صح!');
             subjects.push({ n, p, d });
-            localStorage.setItem('study_subs', JSON.stringify(subjects));
+            localStorage.setItem('study_pro_subs', JSON.stringify(subjects));
             document.getElementById('subName').value = ''; document.getElementById('subPgs').value = '';
             renderSubjects();
         }
 
         function renderSubjects() {
             const container = document.getElementById('subjectsList');
-            container.innerHTML = subjects.length > 0 ? '<h3 class="font-bold text-gray-600 text-sm mb-2">موادك:</h3>' : '';
+            container.innerHTML = subjects.length > 0 ? '<h3 class="font-bold text-slate-400 text-xs mb-4 uppercase tracking-widest">موادك الحالية (اضغط للتخطيط)</h3>' : '';
             subjects.forEach((s, i) => {
                 const days = Math.ceil((new Date(s.d) - new Date()) / (1000 * 60 * 60 * 24));
                 container.innerHTML += `
-                    <div class="card p-4 border-r-4 border-blue-500 flex justify-between items-center shadow-sm">
-                        <div><b class="text-blue-900">${s.n}</b><p class="text-[11px] text-gray-500">${s.p} ص | باقي ${days > 0 ? days : 0} يوم</p></div>
-                        <button onclick="removeSub(${i})" class="text-red-400 text-xs">حذف</button>
+                    <div onclick="openModal(${i})" class="card p-5 border-t-0 border-r-8 border-indigo-500 flex justify-between items-center cursor-pointer hover:scale-[1.02] active:scale-95">
+                        <div>
+                            <b class="text-slate-800 text-lg">${s.n}</b>
+                            <p class="text-xs text-slate-400 font-medium">${s.p} صفحة • باقي ${days > 0 ? days : 0} يوم</p>
+                        </div>
+                        <button onclick="event.stopPropagation(); removeSub(${i})" class="w-8 h-8 flex items-center justify-center bg-red-50 text-red-400 rounded-full text-xs">✕</button>
                     </div>`;
             });
         }
 
-        function removeSub(i) { subjects.splice(i, 1); localStorage.setItem('study_subs', JSON.stringify(subjects)); renderSubjects(); }
+        function openModal(i) { selectedSubIndex = i; document.getElementById('modalSubName').innerText = subjects[i].n; document.getElementById('subModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('subModal').style.display = 'none'; }
+        function removeSub(i) { subjects.splice(i, 1); localStorage.setItem('study_pro_subs', JSON.stringify(subjects)); renderSubjects(); }
 
         // المنبه المطور
         function toggleTimer() {
             const btn = document.getElementById('timerBtn');
-            const customMin = document.getElementById('customMinutes').value;
-
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-                btn.innerText = "استكمال ▶️";
-                btn.classList.replace('bg-orange-500', 'bg-green-500');
-            } else {
-                if (!remainingTime) remainingTime = customMin * 60;
-                btn.innerText = "إيقاف مؤقت ⏸️";
-                btn.classList.replace('bg-green-500', 'bg-orange-500');
-                
+            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; btn.innerText = "استكمال ▶️"; }
+            else {
+                if (!remainingTime) remainingTime = 25 * 60;
+                btn.innerText = "إيقاف ⏸️";
                 timerInterval = setInterval(() => {
                     remainingTime--;
                     const m = Math.floor(remainingTime / 60), s = remainingTime % 60;
                     document.getElementById('timerDisp').innerText = `${m}:${s.toString().padStart(2, '0')}`;
-                    
-                    if (remainingTime <= 0) {
-                        clearInterval(timerInterval);
-                        document.getElementById('bellSound').play();
-                        alert(`عاش يا ${currentUser.name.split(' ')[0]}! وقت الاستراحة.`);
-                        resetTimer();
+                    if (remainingTime <= 0) { 
+                        clearInterval(timerInterval); 
+                        const alarm = document.getElementById('bellSound');
+                        alarm.play(); 
+                        document.getElementById('stopAlarmBtn').classList.remove('hidden');
+                        document.getElementById('alarmStatus').classList.remove('hidden');
+                        alert("خلصنا! الوقت انتهى يا بطل."); 
                     }
                 }, 1000);
             }
         }
-
-        function resetTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            remainingTime = null;
-            const customMin = document.getElementById('customMinutes').value;
-            document.getElementById('timerDisp').innerText = `${customMin}:00`;
-            const btn = document.getElementById('timerBtn');
-            btn.innerText = "ابدأ ▶️";
-            btn.classList.remove('bg-orange-500');
-            btn.classList.add('bg-green-500');
+        function stopAlarm() { 
+            const alarm = document.getElementById('bellSound'); alarm.pause(); alarm.currentTime = 0;
+            document.getElementById('stopAlarmBtn').classList.add('hidden');
+            document.getElementById('alarmStatus').classList.add('hidden');
+            resetTimer();
         }
+        function resetTimer() { clearInterval(timerInterval); timerInterval = null; remainingTime = 25 * 60; document.getElementById('timerDisp').innerText = "25:00"; document.getElementById('timerBtn').innerText = "ابدأ الجلسة ▶️"; }
 
-        // Gemini AI الذكي
-        async function getAISchedule() {
-            if (subjects.length === 0) return alert('ضيف مواد الأول يا بطل!');
+        // Gemini AI PRO
+        async function getSpecificAI(type) {
+            closeModal();
             const resBox = document.getElementById('aiResponse');
             resBox.classList.remove('hidden');
-            resBox.innerText = "جاري استشارة Gemini... ثواني.";
+            resBox.innerText = "جاري التخطيط بذكاء... 🧠";
+            
+            let prompt = "";
+            if (type === 'today') {
+                const s = subjects[selectedSubIndex];
+                prompt = `أنا اسمي ${currentUser.name}. عايز أذاكر مادة "${s.n}" اللي فيها ${s.p} صفحة "النهاردة فقط". اعملي جدول بالساعات لليوم ده، قولي أبدأ الساعة كام وأذاكر كام صفحة وأخد بريك قد إيه. خلي اللهجة مصرية تشجيعية جداً.`;
+            } else if (type === 'longterm') {
+                const s = subjects[selectedSubIndex];
+                prompt = `أنا ${currentUser.name}. عندي مادة "${s.n}" فيها ${s.p} صفحة وامتحاني كمان ${Math.ceil((new Date(s.d) - new Date())/(1000*60*60*24))} يوم. وزعلي المادة دي على الأيام بذكاء بحيث مجهودي يقل تدريجياً. بلهجة مصرية.`;
+            } else {
+                prompt = `أنا ${currentUser.name}. عندي المواد دي: ${JSON.stringify(subjects)}. اعملي جدول عام يراعي أولويات الامتحانات القريبة. بلهجة مصرية.`;
+            }
 
             try {
-                const prompt = `أنا اسمي ${currentUser.name}. موادي: ${JSON.stringify(subjects)}. اعملي جدول دراسي مريح بلهجة مصرية، ناديني باسمي، ووزع الصفحات بذكاء على الأيام.`;
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyCKpPdJmQUb_5Qr5HcLleZGdRm2hMVmg9I`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
                 const data = await res.json();
                 resBox.innerText = data.candidates[0].content.parts[0].text;
-            } catch (e) {
-                resBox.innerText = "الخدمة مشغولة، دوس تاني وهتشتغل فوراً!";
-            }
+                resBox.scrollIntoView({ behavior: 'smooth' });
+            } catch (e) { resBox.innerText = "السيرفر مهنج شوية، جرب تدوس تاني يا بطل!"; }
         }
     </script>
 </body>
