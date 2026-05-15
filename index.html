@@ -37,7 +37,7 @@
         <div class="max-w-sm w-full text-center">
             <div class="text-6xl mb-6">🎓</div>
             <h2 class="text-3xl font-black text-slate-800 mb-2">أهلاً بك!</h2>
-            <input id="userNameInput" type="text" placeholder="اكتب اسمك هنا..." class="w-full p-5 bg-slate-100 rounded-2xl mb-4 text-center text-xl outline-none">
+            <input id="userNameInput" type="text" placeholder="اكتب اسمك هنا..." class="w-full p-5 bg-slate-100 rounded-2xl mb-4 text-center text-xl outline-none border-2 focus:border-indigo-400">
             <button onclick="login()" class="btn-main w-full py-5 text-xl">دخول 🚀</button>
         </div>
     </div>
@@ -69,7 +69,7 @@
                 <div class="flex flex-col gap-3">
                     <button id="timerBtn" onclick="toggleTimer()" class="btn-main py-5 text-xl shadow-lg">ابدأ الجلسة ▶️</button>
                     <button id="beBeastBtn" onclick="beBeast()" class="hidden w-full py-4 bg-orange-100 text-orange-600 rounded-xl font-black border-2 border-orange-300">أنا وحش وهقدر أذاكر أكتر! 🔥</button>
-                    <button onclick="skipSession()" class="text-slate-300 text-xs mt-2">تخطي الوقت (للتجربة)</button>
+                    <button onclick="skipSession()" class="text-slate-300 text-xs mt-2 hover:text-indigo-500">تخطي الوقت (للتجربة)</button>
                 </div>
                 <button id="stopBtn" onclick="triggerAlarmStop()" class="hidden w-full mt-4 bg-red-600 text-white py-5 rounded-2xl font-black animate-pulse">إيقاف الإنذار 🔕</button>
             </div>
@@ -99,7 +99,9 @@
     <script>
         let user = JSON.parse(localStorage.getItem('study_user')) || null;
         let subjects = [];
-        let timerInterval, isBreak = false, currentIqAnswer = null;
+        let timerInterval = null; 
+        let isBreak = false;
+        let currentIqAnswer = null;
         let activeSubId = localStorage.getItem('active_sub_id') || null;
         let dailyPagesDone = parseInt(localStorage.getItem('daily_pages_done')) || 0;
         let isBeastMode = JSON.parse(localStorage.getItem('beast_mode')) || false;
@@ -155,7 +157,7 @@
                             <div class="text-right"><h3 class="text-2xl font-black text-slate-800">${s.n}</h3><p class="text-slate-400 font-bold text-sm">📅 باقي ${days > 0 ? days : 0} يوم</p></div>
                             <span class="bg-indigo-50 text-indigo-600 p-2 rounded-xl text-xs font-black">${s.p} صفحة</span>
                         </div>
-                        <button onclick="event.stopPropagation(); finishSubject(${s.id})" class="w-full py-3 bg-green-50 text-green-600 rounded-xl font-bold">أنا خلصت المادة ✅</button>
+                        <button onclick="event.stopPropagation(); finishSubject(${s.id})" class="w-full py-3 bg-green-50 text-green-600 rounded-xl font-bold hover:bg-green-600 hover:text-white transition">أنا خلصت المادة ✅</button>
                     </div>`;
             });
         }
@@ -173,7 +175,7 @@
                 return;
             }
 
-            document.getElementById('sessionInfo').innerText = `المادة: ${sub.n}\nمستعد تبدأ الـ 5 صفحات؟`;
+            document.getElementById('sessionInfo').innerText = `المادة: ${sub ? sub.n : 'بدون اسم'}\nمستعد تبدأ الـ 5 صفحات؟`;
             document.getElementById('timerBtn').classList.remove('hidden');
             document.getElementById('beBeastBtn').classList.add('hidden');
             document.getElementById('timerDisp').innerText = "60:00";
@@ -183,7 +185,7 @@
             if(!activeSubId) return alert("اختر مادة أولاً من الجدول");
             isBreak = false;
             localStorage.setItem('timer_is_break', false);
-            startTimer(60 * 60);
+            startTimer(60 * 60); 
             document.getElementById('timerBtn').classList.add('hidden');
             document.getElementById('statusLabel').innerText = "وضع المذاكرة 📖";
             document.getElementById('timerCard').className = "card text-center flex flex-col justify-center relative overflow-hidden study-active";
@@ -199,7 +201,10 @@
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 const endTime = localStorage.getItem('timer_end_time');
-                if (!endTime) return;
+                if (!endTime) {
+                    clearInterval(timerInterval);
+                    return;
+                }
                 const diff = Math.ceil((endTime - Date.now()) / 1000);
                 if (diff <= 0) {
                     clearInterval(timerInterval);
@@ -254,7 +259,8 @@
         }
 
         function stopEverything() {
-            clearInterval(timerInterval);
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
             localStorage.removeItem('timer_end_time');
             localStorage.removeItem('timer_is_break');
             document.getElementById('timerDisp').innerText = "00:00";
@@ -267,10 +273,9 @@
         }
 
         function finishSubject(id) {
-            confetti({ particleCount: 150 });
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             document.getElementById('cheerSound').play();
             
-            // لو المادة اللي بتتمسح هي اللي شغالة حالياً.. وقف العداد فوراً
             if (activeSubId == id) {
                 stopEverything();
                 activeSubId = null;
@@ -281,7 +286,7 @@
             setTimeout(() => {
                 subjects = subjects.filter(s => s.id !== id);
                 saveAndRender();
-            }, 1000);
+            }, 500);
         }
 
         function beBeast() {
