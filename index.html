@@ -165,7 +165,6 @@
             localStorage.setItem('active_sub_id', id);
             const sub = subjects.find(s => s.id == id);
             
-            // تحقق من الـ 20 صفحة
             if (dailyPagesDone >= 20 && !isBeastMode) {
                 document.getElementById('sessionInfo').innerText = `🛑 خلصت الـ 20 صفحة بتوع النهاردة يا بطل!\nارتاح وكمل بكرة أو دوس "أنا وحش" لو لسه فيك طاقة.`;
                 document.getElementById('timerBtn').classList.add('hidden');
@@ -184,7 +183,7 @@
             if(!activeSubId) return alert("اختر مادة أولاً من الجدول");
             isBreak = false;
             localStorage.setItem('timer_is_break', false);
-            startTimer(60 * 60); // ساعة مذاكرة
+            startTimer(60 * 60);
             document.getElementById('timerBtn').classList.add('hidden');
             document.getElementById('statusLabel').innerText = "وضع المذاكرة 📖";
             document.getElementById('timerCard').className = "card text-center flex flex-col justify-center relative overflow-hidden study-active";
@@ -199,7 +198,9 @@
         function runUIUpdate() {
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                const diff = Math.ceil((localStorage.getItem('timer_end_time') - Date.now()) / 1000);
+                const endTime = localStorage.getItem('timer_end_time');
+                if (!endTime) return;
+                const diff = Math.ceil((endTime - Date.now()) / 1000);
                 if (diff <= 0) {
                     clearInterval(timerInterval);
                     document.getElementById('timerDisp').innerText = "00:00";
@@ -232,7 +233,6 @@
                     localStorage.setItem('daily_pages_done', dailyPagesDone);
                 }
                 
-                // تحديد مدة البريك (15 دقيقة أو ساعة لو خلص 10 صفحات)
                 if (!isBreak) {
                     isBreak = true;
                     localStorage.setItem('timer_is_break', true);
@@ -242,9 +242,7 @@
                     document.getElementById('sessionInfo').innerText = (dailyPagesDone % 10 === 0) ? "عاش! خلصت 10 صفحات، ليك ساعة بريك." : "بريك 15 دقيقة.. ارتاح شوية.";
                     document.getElementById('timerCard').className = "card text-center flex flex-col justify-center relative overflow-hidden break-active";
                 } else {
-                    // بعد انتهاء البريك، نرجع لوضع الاختيار
-                    localStorage.removeItem('timer_end_time');
-                    document.getElementById('timerDisp').innerText = "00:00";
+                    stopEverything();
                     selectSubject(activeSubId);
                 }
             } else alert("ركز يا وحش!");
@@ -253,6 +251,37 @@
         function deductPages() {
             let sub = subjects.find(s => s.id == activeSubId);
             if (sub) { sub.p = Math.max(0, sub.p - 5); saveAndRender(); }
+        }
+
+        function stopEverything() {
+            clearInterval(timerInterval);
+            localStorage.removeItem('timer_end_time');
+            localStorage.removeItem('timer_is_break');
+            document.getElementById('timerDisp').innerText = "00:00";
+            document.getElementById('statusLabel').innerText = "اختر مادة";
+            document.getElementById('timerCard').className = "card text-center flex flex-col justify-center relative overflow-hidden";
+            document.getElementById('stopBtn').classList.add('hidden');
+            document.getElementById('timerBtn').classList.remove('hidden');
+            document.getElementById('bellSound').pause();
+            document.getElementById('bellSound').currentTime = 0;
+        }
+
+        function finishSubject(id) {
+            confetti({ particleCount: 150 });
+            document.getElementById('cheerSound').play();
+            
+            // لو المادة اللي بتتمسح هي اللي شغالة حالياً.. وقف العداد فوراً
+            if (activeSubId == id) {
+                stopEverything();
+                activeSubId = null;
+                localStorage.removeItem('active_sub_id');
+                document.getElementById('sessionInfo').innerText = "تم إنهاء المادة بنجاح! اختر مادة تانية.";
+            }
+
+            setTimeout(() => {
+                subjects = subjects.filter(s => s.id !== id);
+                saveAndRender();
+            }, 1000);
         }
 
         function beBeast() {
@@ -266,10 +295,6 @@
         }
 
         function closeBeastModal() { document.getElementById('beastModal').style.display = 'none'; }
-        function finishSubject(id) {
-            confetti({ particleCount: 150 }); document.getElementById('cheerSound').play();
-            setTimeout(() => { subjects = subjects.filter(s => s.id !== id); saveAndRender(); }, 1000);
-        }
         function skipSession() { localStorage.setItem('timer_end_time', Date.now() + 1000); }
     </script>
 </body>
