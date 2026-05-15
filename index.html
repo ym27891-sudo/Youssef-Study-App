@@ -31,7 +31,7 @@
     <div id="beastModal" class="modal">
         <div class="beast-modal-content text-center max-w-sm">
             <div class="text-7xl mb-4">🦁</div>
-            <h2 class="text-3xl font-black text-orange-600 mb-2">وحش يا بطل!</h2>
+            <h2 class="text-3xl font-black text-orange-600 mb-2">وحش يا <span id="beastName">بطل</span>!</h2>
             <p class="text-slate-600 font-bold mb-6 italic">كسرنا القاعدة، هنخلص المادة كلها النهارده! 🔥</p>
             <button onclick="closeBeastModal()" class="btn-main w-full bg-orange-500 py-4 text-xl">يلا بينا! 🚀</button>
         </div>
@@ -56,8 +56,8 @@
     </div>
 
     <div class="max-w-6xl mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-            <div class="text-center md:text-right">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 text-right">
+            <div class="text-right">
                 <h1 class="text-4xl font-black text-slate-900 mb-1">المساعد الذكي <span class="text-indigo-600">PRO</span></h1>
                 <p id="welcomeMsg" class="text-slate-500 font-bold text-lg"></p>
             </div>
@@ -75,14 +75,14 @@
                         <button id="timerBtn" onclick="toggleTimer()" class="flex-[3] btn-main py-5 text-xl shadow-lg shadow-indigo-200">ابدأ الآن ▶️</button>
                         <button onclick="skipSession()" class="flex-1 bg-slate-100 text-slate-500 rounded-2xl font-bold hover:bg-slate-200">تخطي ⏭️</button>
                     </div>
-                    <button id="beBeastBtn" onclick="beBeast()" class="hidden w-full py-3 bg-orange-100 text-orange-600 rounded-xl font-black text-sm border-2 border-orange-300">أنا وحش وهقدر أذاكر أكتر من 20 صفحة! 🔥</button>
+                    <button id="beBeastBtn" onclick="beBeast()" class="hidden w-full py-3 bg-orange-100 text-orange-600 rounded-xl font-black text-sm border-2 border-orange-300">أنا قادر أذاكر أكتر! 🔥</button>
                 </div>
                 <button id="stopBtn" onclick="triggerAlarmStop()" class="hidden w-full mt-4 bg-red-600 text-white py-5 rounded-2xl font-black animate-pulse">إيقاف الإنذار 🔕</button>
             </div>
 
-            <div class="card border-t-6 border-indigo-400">
+            <div class="card border-t-6 border-indigo-400 text-right">
                 <h2 class="text-slate-800 font-black text-xl mb-6">➕ إضافة مادة للجدول</h2>
-                <div class="space-y-4 text-center">
+                <div class="space-y-4">
                     <input id="subName" type="text" placeholder="اسم المادة" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-400 outline-none text-center">
                     <div class="grid grid-cols-2 gap-4">
                         <input id="subPgs" type="number" placeholder="كم صفحة؟" class="p-5 bg-slate-50 rounded-2xl outline-none text-center">
@@ -127,7 +127,7 @@
         }
 
         function setupUser() {
-            document.getElementById('welcomeMsg').innerText = `جاهز تفرتك الكتب يا ${user.name}؟ 🔥`;
+            document.getElementById('welcomeMsg').innerText = `منور يا ${user.name} 👋 جاهز تذاكر؟ 🔥`;
             subjects = JSON.parse(localStorage.getItem(`subs_${user.name}`)) || [];
             renderSubjects();
         }
@@ -176,13 +176,14 @@
             isBreak = false;
             localStorage.setItem('timer_is_break', false);
             
-            let duration = 60 * 60; // ساعة مذاكرة
-            startTimer(duration);
+            startTimer(60 * 60);
             
             let info = `المادة: ${sub.n}`;
             if (sub.p > 20 && !isBeastMode) {
                 info += `\n⚠️ هنذاكر 20 صفحة بس والباقي يترحل.`;
                 document.getElementById('beBeastBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('beBeastBtn').classList.add('hidden');
             }
             document.getElementById('sessionInfo').innerText = info;
             document.getElementById('statusLabel').innerText = "وضع المذاكرة 📖";
@@ -221,9 +222,7 @@
         }
 
         function toggleTimer() {
-            // للتسهيل في الـ PWA، البدء يعيد الجلسة لو وقفت
-            const sub = subjects.find(s => s.id == activeSubId);
-            if(!sub) return alert("اختر مادة أولاً");
+            if(!activeSubId) return alert("اختر مادة أولاً");
             startTimer(60 * 60);
         }
 
@@ -241,11 +240,8 @@
                 document.getElementById('stopBtn').classList.add('hidden');
                 document.getElementById('timerBtn').classList.remove('hidden');
                 
-                // خصم الصفحات عند انتهاء المذاكرة (لو مكنش بريك)
                 isBreak = JSON.parse(localStorage.getItem('timer_is_break'));
-                if (!isBreak) {
-                    deductPages();
-                }
+                if (!isBreak) deductPages();
                 
                 nextPhase();
             } else alert("ركز يا وحش!");
@@ -254,17 +250,15 @@
         function deductPages() {
             let sub = subjects.find(s => s.id == activeSubId);
             if (sub) {
-                sub.p = Math.max(0, sub.p - 5); // خصم 5 صفحات
+                sub.p = Math.max(0, sub.p - 5);
                 saveAndRender();
-                alert(`عاش! خصمنا 5 صفحات من ${sub.n}. فاضلك ${sub.p} صفحة.`);
             }
         }
 
         function nextPhase() {
             isBreak = !JSON.parse(localStorage.getItem('timer_is_break'));
             localStorage.setItem('timer_is_break', isBreak);
-            const duration = isBreak ? 15 * 60 : 60 * 60;
-            startTimer(duration);
+            startTimer(isBreak ? 15 * 60 : 60 * 60);
             
             document.getElementById('statusLabel').innerText = isBreak ? "وقت البريك ☕" : "وضع المذاكرة 📖";
             document.getElementById('timerCard').className = isBreak ? "card text-center flex flex-col justify-center relative overflow-hidden break-active" : "card text-center flex flex-col justify-center relative overflow-hidden study-active";
@@ -275,12 +269,28 @@
             document.getElementById('cheerSound').play();
             setTimeout(() => {
                 subjects = subjects.filter(s => s.id !== id);
+                isBeastMode = false;
+                localStorage.setItem('beast_mode', false);
                 saveAndRender();
             }, 1000);
         }
 
+        function beBeast() {
+            isBeastMode = true;
+            localStorage.setItem('beast_mode', true);
+            document.getElementById('beBeastBtn').classList.add('hidden');
+            
+            // تحديث اسم المودال بالاسم المسجل
+            document.getElementById('beastName').innerText = user.name;
+            document.getElementById('beastModal').style.display = 'flex';
+            
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#f97316', '#fbbf24', '#ffffff'] });
+            document.getElementById('cheerSound').play();
+            startSubjectPlan(activeSubId);
+        }
+
+        function closeBeastModal() { document.getElementById('beastModal').style.display = 'none'; }
         function skipSession() { localStorage.setItem('timer_end_time', Date.now() + 1000); }
-        function beBeast() { isBeastMode = true; localStorage.setItem('beast_mode', true); document.getElementById('beBeastBtn').classList.add('hidden'); confetti(); }
     </script>
 </body>
 </html>
