@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المساعد الدراسي الذكي PRO 🎓</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2997/2997312.png">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
@@ -18,12 +15,11 @@
         .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center; }
         .beast-modal-content { background: white; padding: 2.5rem; border-radius: 32px; border: 4px solid #f97316; animation: beastIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes beastIn { from { transform: scale(0); rotate: -10deg; } to { transform: scale(1); rotate: 0deg; } }
-        .study-active { border: 4px solid #6366f1; animation: pulse-border 2s infinite; }
+        .study-active { border: 4px solid #6366f1; }
         .break-active { border: 4px solid #10b981; }
-        .border-priority-1 { border: 6px solid #ef4444 !important; transform: scale(1.02); }
+        .border-priority-1 { border: 6px solid #ef4444 !important; }
         .border-priority-2 { border: 5px solid #f97316 !important; }
-        .border-priority-rest { border: 4px solid #a855f7 !important; opacity: 0.9; }
-        @keyframes pulse-border { 0% { border-color: #6366f1; } 50% { border-color: #a855f7; } 100% { border-color: #6366f1; } }
+        .border-priority-rest { border: 4px solid #a855f7 !important; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -32,7 +28,7 @@
         <div class="beast-modal-content text-center max-w-sm">
             <div class="text-7xl mb-4">🦁</div>
             <h2 class="text-3xl font-black text-orange-600 mb-2">وحش يا <span id="beastName">بطل</span>!</h2>
-            <p class="text-slate-600 font-bold mb-6 italic">كسرنا القاعدة، هنخلص المادة كلها النهارده! 🔥</p>
+            <p class="text-slate-600 font-bold mb-6">كسرنا حاجز الـ 20 صفحة، مكملين لحد ما نفرتك المادة! 🔥</p>
             <button onclick="closeBeastModal()" class="btn-main w-full bg-orange-500 py-4 text-xl">يلا بينا! 🚀</button>
         </div>
     </div>
@@ -41,60 +37,58 @@
         <div class="max-w-sm w-full text-center">
             <div class="text-6xl mb-6">🎓</div>
             <h2 class="text-3xl font-black text-slate-800 mb-2">أهلاً بك!</h2>
-            <input id="userNameInput" type="text" placeholder="اكتب اسمك هنا..." class="w-full p-5 bg-slate-100 rounded-2xl mb-4 text-center text-xl outline-none focus:ring-4 focus:ring-indigo-200">
+            <input id="userNameInput" type="text" placeholder="اكتب اسمك هنا..." class="w-full p-5 bg-slate-100 rounded-2xl mb-4 text-center text-xl outline-none">
             <button onclick="login()" class="btn-main w-full py-5 text-xl">دخول 🚀</button>
         </div>
     </div>
 
     <div id="iqModal" class="modal">
         <div class="card w-full max-w-sm text-center border-4 border-red-500">
-            <h2 class="text-2xl font-bold text-red-600 mb-4">⚠️ فك الشفرة عشان تقفل!</h2>
+            <h2 class="text-2xl font-bold text-red-600 mb-4">⚠️ فك الشفرة للراحة</h2>
             <p id="iqQuestion" class="text-3xl mb-6 font-black text-slate-800 text-center"></p>
             <input id="iqAnswer" type="number" class="w-full p-4 bg-slate-100 rounded-2xl mb-4 text-center text-3xl font-bold">
-            <button onclick="checkIQ()" class="btn-main w-full bg-red-600">تأكيد الإجابة ✅</button>
+            <button onclick="checkIQ()" class="btn-main w-full bg-red-600">تأكيد ✅</button>
         </div>
     </div>
 
     <div class="max-w-6xl mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 text-right">
+        <header class="flex justify-between items-center mb-10">
             <div class="text-right">
                 <h1 class="text-4xl font-black text-slate-900 mb-1">المساعد الذكي <span class="text-indigo-600">PRO</span></h1>
                 <p id="welcomeMsg" class="text-slate-500 font-bold text-lg"></p>
             </div>
-            <button onclick="logout()" class="text-slate-400 hover:text-red-500 transition font-bold">تبديل المستخدم 👤</button>
+            <button onclick="logout()" class="text-slate-400 font-bold">👤 خروج</button>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             <div id="timerCard" class="card text-center flex flex-col justify-center relative overflow-hidden">
-                <div id="statusLabel" class="text-xs font-black uppercase tracking-widest text-indigo-500 mb-2">في انتظارك..</div>
+                <div id="statusLabel" class="text-xs font-black uppercase tracking-widest text-indigo-500 mb-2">اختر مادة</div>
                 <div id="timerDisp" class="text-8xl font-black text-slate-800 mb-8 tracking-tighter">00:00</div>
-                <div id="sessionInfo" class="text-slate-400 text-sm mb-6 font-bold leading-relaxed whitespace-pre-line text-center">اختر مادة من الجدول تحت عشان نبدأ</div>
+                <div id="sessionInfo" class="text-slate-400 text-sm mb-6 font-bold leading-relaxed text-center">بانتظار الضغط على "ابدأ الجلسة"</div>
                 
                 <div class="flex flex-col gap-3">
-                    <div class="flex gap-2">
-                        <button id="timerBtn" onclick="toggleTimer()" class="flex-[3] btn-main py-5 text-xl shadow-lg shadow-indigo-200">ابدأ الآن ▶️</button>
-                        <button onclick="skipSession()" class="flex-1 bg-slate-100 text-slate-500 rounded-2xl font-bold hover:bg-slate-200">تخطي ⏭️</button>
-                    </div>
-                    <button id="beBeastBtn" onclick="beBeast()" class="hidden w-full py-3 bg-orange-100 text-orange-600 rounded-xl font-black text-sm border-2 border-orange-300">أنا قادر أذاكر أكتر! 🔥</button>
+                    <button id="timerBtn" onclick="toggleTimer()" class="btn-main py-5 text-xl shadow-lg">ابدأ الجلسة ▶️</button>
+                    <button id="beBeastBtn" onclick="beBeast()" class="hidden w-full py-4 bg-orange-100 text-orange-600 rounded-xl font-black border-2 border-orange-300">أنا وحش وهقدر أذاكر أكتر! 🔥</button>
+                    <button onclick="skipSession()" class="text-slate-300 text-xs mt-2">تخطي الوقت (للتجربة)</button>
                 </div>
                 <button id="stopBtn" onclick="triggerAlarmStop()" class="hidden w-full mt-4 bg-red-600 text-white py-5 rounded-2xl font-black animate-pulse">إيقاف الإنذار 🔕</button>
             </div>
 
             <div class="card border-t-6 border-indigo-400 text-right">
-                <h2 class="text-slate-800 font-black text-xl mb-6">➕ إضافة مادة للجدول</h2>
+                <h2 class="text-slate-800 font-black text-xl mb-6">➕ إضافة مادة</h2>
                 <div class="space-y-4">
-                    <input id="subName" type="text" placeholder="اسم المادة" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-indigo-400 outline-none text-center">
+                    <input id="subName" type="text" placeholder="اسم المادة" class="w-full p-5 bg-slate-50 rounded-2xl outline-none text-center border-2 border-transparent focus:border-indigo-400">
                     <div class="grid grid-cols-2 gap-4">
-                        <input id="subPgs" type="number" placeholder="كم صفحة؟" class="p-5 bg-slate-50 rounded-2xl outline-none text-center">
-                        <input id="subDate" type="date" class="p-5 bg-slate-50 rounded-2xl outline-none text-xs text-center">
+                        <input id="subPgs" type="number" placeholder="عدد الصفحات" class="p-5 bg-slate-50 rounded-2xl text-center">
+                        <input id="subDate" type="date" class="p-5 bg-slate-50 rounded-2xl text-center text-xs">
                     </div>
-                    <button onclick="addSub()" class="btn-main w-full py-5 text-lg shadow-xl shadow-indigo-100">تثبيت في الجدول 📌</button>
+                    <button onclick="addSub()" class="btn-main w-full py-5 shadow-xl">تثبيت في الجدول 📌</button>
                 </div>
             </div>
         </div>
 
         <div class="w-full">
-            <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3 text-right">📅 ترتيب الأولوية <span id="subCount" class="text-sm bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">0</span></h2>
+            <h2 class="text-2xl font-black text-slate-800 mb-6 text-right">📅 جدول الأولويات</h2>
             <div id="subjectsList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20"></div>
         </div>
     </div>
@@ -107,13 +101,14 @@
         let subjects = [];
         let timerInterval, isBreak = false, currentIqAnswer = null;
         let activeSubId = localStorage.getItem('active_sub_id') || null;
+        let dailyPagesDone = parseInt(localStorage.getItem('daily_pages_done')) || 0;
         let isBeastMode = JSON.parse(localStorage.getItem('beast_mode')) || false;
 
         window.onload = () => { 
             if (!user) document.getElementById('loginOverlay').classList.remove('hidden'); 
             else {
                 setupUser();
-                checkSavedTimer();
+                if (localStorage.getItem('timer_end_time')) runUIUpdate();
             }
         };
 
@@ -127,7 +122,7 @@
         }
 
         function setupUser() {
-            document.getElementById('welcomeMsg').innerText = `منور يا ${user.name} 👋 جاهز تذاكر؟ 🔥`;
+            document.getElementById('welcomeMsg').innerText = `منور يا ${user.name} 👋`;
             subjects = JSON.parse(localStorage.getItem(`subs_${user.name}`)) || [];
             renderSubjects();
         }
@@ -150,18 +145,14 @@
 
         function renderSubjects() {
             const container = document.getElementById('subjectsList');
-            document.getElementById('subCount').innerText = subjects.length;
             container.innerHTML = '';
             subjects.forEach((s, index) => {
                 const days = Math.ceil((new Date(s.d) - new Date())/(1000*60*60*24));
                 let pClass = index === 0 ? "border-priority-1" : (index === 1 ? "border-priority-2" : "border-priority-rest");
                 container.innerHTML += `
-                    <div class="card ${pClass} hover:translate-y-[-5px] transition-all cursor-pointer" onclick="startSubjectPlan(${s.id})">
+                    <div class="card ${pClass} hover:translate-y-[-2px] transition-all cursor-pointer" onclick="selectSubject(${s.id})">
                         <div class="flex justify-between items-start mb-4">
-                            <div class="text-right">
-                                <h3 class="text-2xl font-black text-slate-800">${s.n}</h3>
-                                <p class="text-slate-400 font-bold text-sm">📅 باقي ${days > 0 ? days : 0} يوم</p>
-                            </div>
+                            <div class="text-right"><h3 class="text-2xl font-black text-slate-800">${s.n}</h3><p class="text-slate-400 font-bold text-sm">📅 باقي ${days > 0 ? days : 0} يوم</p></div>
                             <span class="bg-indigo-50 text-indigo-600 p-2 rounded-xl text-xs font-black">${s.p} صفحة</span>
                         </div>
                         <button onclick="event.stopPropagation(); finishSubject(${s.id})" class="w-full py-3 bg-green-50 text-green-600 rounded-xl font-bold">أنا خلصت المادة ✅</button>
@@ -169,23 +160,32 @@
             });
         }
 
-        function startSubjectPlan(id) {
+        function selectSubject(id) {
             activeSubId = id;
             localStorage.setItem('active_sub_id', id);
             const sub = subjects.find(s => s.id == id);
+            
+            // تحقق من الـ 20 صفحة
+            if (dailyPagesDone >= 20 && !isBeastMode) {
+                document.getElementById('sessionInfo').innerText = `🛑 خلصت الـ 20 صفحة بتوع النهاردة يا بطل!\nارتاح وكمل بكرة أو دوس "أنا وحش" لو لسه فيك طاقة.`;
+                document.getElementById('timerBtn').classList.add('hidden');
+                document.getElementById('beBeastBtn').classList.remove('hidden');
+                document.getElementById('timerDisp').innerText = "DONE";
+                return;
+            }
+
+            document.getElementById('sessionInfo').innerText = `المادة: ${sub.n}\nمستعد تبدأ الـ 5 صفحات؟`;
+            document.getElementById('timerBtn').classList.remove('hidden');
+            document.getElementById('beBeastBtn').classList.add('hidden');
+            document.getElementById('timerDisp').innerText = "60:00";
+        }
+
+        function toggleTimer() {
+            if(!activeSubId) return alert("اختر مادة أولاً من الجدول");
             isBreak = false;
             localStorage.setItem('timer_is_break', false);
-            
-            startTimer(60 * 60);
-            
-            let info = `المادة: ${sub.n}`;
-            if (sub.p > 20 && !isBeastMode) {
-                info += `\n⚠️ هنذاكر 20 صفحة بس والباقي يترحل.`;
-                document.getElementById('beBeastBtn').classList.remove('hidden');
-            } else {
-                document.getElementById('beBeastBtn').classList.add('hidden');
-            }
-            document.getElementById('sessionInfo').innerText = info;
+            startTimer(60 * 60); // ساعة مذاكرة
+            document.getElementById('timerBtn').classList.add('hidden');
             document.getElementById('statusLabel').innerText = "وضع المذاكرة 📖";
             document.getElementById('timerCard').className = "card text-center flex flex-col justify-center relative overflow-hidden study-active";
         }
@@ -196,34 +196,20 @@
             runUIUpdate();
         }
 
-        function checkSavedTimer() {
-            const endTime = localStorage.getItem('timer_end_time');
-            if (endTime) runUIUpdate();
-        }
-
         function runUIUpdate() {
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                const now = Date.now();
-                const endTime = localStorage.getItem('timer_end_time');
-                const diff = Math.ceil((endTime - now) / 1000);
-
+                const diff = Math.ceil((localStorage.getItem('timer_end_time') - Date.now()) / 1000);
                 if (diff <= 0) {
                     clearInterval(timerInterval);
                     document.getElementById('timerDisp').innerText = "00:00";
                     document.getElementById('bellSound').play();
                     document.getElementById('stopBtn').classList.remove('hidden');
-                    document.getElementById('timerBtn').classList.add('hidden');
                 } else {
                     const m = Math.floor(diff / 60), s = diff % 60;
                     document.getElementById('timerDisp').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
                 }
             }, 1000);
-        }
-
-        function toggleTimer() {
-            if(!activeSubId) return alert("اختر مادة أولاً");
-            startTimer(60 * 60);
         }
 
         function triggerAlarmStop() {
@@ -238,58 +224,52 @@
                 document.getElementById('bellSound').pause();
                 document.getElementById('iqModal').style.display = 'none';
                 document.getElementById('stopBtn').classList.add('hidden');
-                document.getElementById('timerBtn').classList.remove('hidden');
                 
                 isBreak = JSON.parse(localStorage.getItem('timer_is_break'));
-                if (!isBreak) deductPages();
+                if (!isBreak) {
+                    deductPages();
+                    dailyPagesDone += 5;
+                    localStorage.setItem('daily_pages_done', dailyPagesDone);
+                }
                 
-                nextPhase();
+                // تحديد مدة البريك (15 دقيقة أو ساعة لو خلص 10 صفحات)
+                if (!isBreak) {
+                    isBreak = true;
+                    localStorage.setItem('timer_is_break', true);
+                    const breakDuration = (dailyPagesDone % 10 === 0) ? 60 * 60 : 15 * 60;
+                    startTimer(breakDuration);
+                    document.getElementById('statusLabel').innerText = "وقت البريك ☕";
+                    document.getElementById('sessionInfo').innerText = (dailyPagesDone % 10 === 0) ? "عاش! خلصت 10 صفحات، ليك ساعة بريك." : "بريك 15 دقيقة.. ارتاح شوية.";
+                    document.getElementById('timerCard').className = "card text-center flex flex-col justify-center relative overflow-hidden break-active";
+                } else {
+                    // بعد انتهاء البريك، نرجع لوضع الاختيار
+                    localStorage.removeItem('timer_end_time');
+                    document.getElementById('timerDisp').innerText = "00:00";
+                    selectSubject(activeSubId);
+                }
             } else alert("ركز يا وحش!");
         }
 
         function deductPages() {
             let sub = subjects.find(s => s.id == activeSubId);
-            if (sub) {
-                sub.p = Math.max(0, sub.p - 5);
-                saveAndRender();
-            }
-        }
-
-        function nextPhase() {
-            isBreak = !JSON.parse(localStorage.getItem('timer_is_break'));
-            localStorage.setItem('timer_is_break', isBreak);
-            startTimer(isBreak ? 15 * 60 : 60 * 60);
-            
-            document.getElementById('statusLabel').innerText = isBreak ? "وقت البريك ☕" : "وضع المذاكرة 📖";
-            document.getElementById('timerCard').className = isBreak ? "card text-center flex flex-col justify-center relative overflow-hidden break-active" : "card text-center flex flex-col justify-center relative overflow-hidden study-active";
-        }
-
-        function finishSubject(id) {
-            confetti({ particleCount: 150, spread: 70 });
-            document.getElementById('cheerSound').play();
-            setTimeout(() => {
-                subjects = subjects.filter(s => s.id !== id);
-                isBeastMode = false;
-                localStorage.setItem('beast_mode', false);
-                saveAndRender();
-            }, 1000);
+            if (sub) { sub.p = Math.max(0, sub.p - 5); saveAndRender(); }
         }
 
         function beBeast() {
             isBeastMode = true;
             localStorage.setItem('beast_mode', true);
-            document.getElementById('beBeastBtn').classList.add('hidden');
-            
-            // تحديث اسم المودال بالاسم المسجل
             document.getElementById('beastName').innerText = user.name;
             document.getElementById('beastModal').style.display = 'flex';
-            
-            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#f97316', '#fbbf24', '#ffffff'] });
+            confetti({ particleCount: 200, spread: 100 });
             document.getElementById('cheerSound').play();
-            startSubjectPlan(activeSubId);
+            selectSubject(activeSubId);
         }
 
         function closeBeastModal() { document.getElementById('beastModal').style.display = 'none'; }
+        function finishSubject(id) {
+            confetti({ particleCount: 150 }); document.getElementById('cheerSound').play();
+            setTimeout(() => { subjects = subjects.filter(s => s.id !== id); saveAndRender(); }, 1000);
+        }
         function skipSession() { localStorage.setItem('timer_end_time', Date.now() + 1000); }
     </script>
 </body>
