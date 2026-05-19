@@ -25,7 +25,6 @@
 </head>
 <body class="p-4 md:p-8">
 
-    <!-- مودال رسالة الحب والتشجيع بعد الـ 5 صفحات -->
     <div id="loveModal" class="modal">
         <div class="beast-modal-content text-center max-w-sm">
             <div class="text-7xl mb-4">👑💖</div>
@@ -35,7 +34,6 @@
         </div>
     </div>
 
-    <!-- مودال وضع التحدي المستمر -->
     <div id="beastModal" class="modal">
         <div class="beast-modal-content text-center max-w-sm">
             <div class="text-7xl mb-4">⭐🍓</div>
@@ -116,6 +114,7 @@
         let currentIqAnswer = null;
         let activeSubId = localStorage.getItem('active_sub_id') || null;
         let dailyPagesDone = parseInt(localStorage.getItem('daily_pages_done')) || 0;
+        let sessionPagesDone = parseInt(localStorage.getItem('session_pages_done')) || 0;
         let isBeastMode = JSON.parse(localStorage.getItem('beast_mode')) || false;
 
         window.onload = () => { 
@@ -190,14 +189,23 @@
                 return;
             }
 
-            document.getElementById('sessionInfo').innerText = `المادة الحالية: ${sub ? sub.n : 'يلا نختار'} 📖\nجاهزة ومستعدة تخلصي 5 صفحات وتفرحي دادي؟ ✨`;
+            let remainingForLongBreak = 10 - (sessionPagesDone % 10);
+            if (remainingForLongBreak === 10 && sessionPagesDone > 0) remainingForLongBreak = 0; 
+            
+            document.getElementById('sessionInfo').innerText = `المادة الحالية: ${sub ? sub.n : 'يلا نختار'} 📖\nجاهزة ومستعدة تخلصي 5 صفحات وتفرحي دادي؟ ✨\n(خلصنا ${sessionPagesDone} صفحات في الجلسة دي - باقي ${remainingForLongBreak === 0 ? 10 : remainingForLongBreak} صفحات على بريك الساعة!)`;
             document.getElementById('timerBtn').classList.remove('hidden');
             document.getElementById('beBeastBtn').classList.add('hidden');
             
             const isBreak = localStorage.getItem('timer_is_break') === 'true';
             if (!localStorage.getItem('timer_end_time')) {
-                document.getElementById('timerDisp').innerText = isBreak ? "15:00" : "60:00";
-                document.getElementById('statusLabel').innerText = isBreak ? "وقت البريك والراحة ☕" : "وضع المذاكرة والتركيز 📖";
+                if (isBreak) {
+                    let currentBreakTime = localStorage.getItem('current_break_duration') || '15:00';
+                    document.getElementById('timerDisp').innerText = currentBreakTime;
+                    document.getElementById('statusLabel').innerText = "وقت البريك والراحة ☕";
+                } else {
+                    document.getElementById('timerDisp').innerText = "60:00";
+                    document.getElementById('statusLabel').innerText = "وضع المذاكرة والتركيز 📖";
+                }
             }
         }
 
@@ -219,7 +227,6 @@
         function runUIUpdate() {
             if (timerInterval) clearInterval(timerInterval);
             
-            // تحديث الشكل الخارجي بناء على وضع التايمر المستمر
             const isBreak = localStorage.getItem('timer_is_break') === 'true';
             if (isBreak) {
                 document.getElementById('statusLabel').innerText = "وقت البريك والراحة ☕";
@@ -270,18 +277,24 @@
                 const isBreak = localStorage.getItem('timer_is_break') === 'true';
                 
                 if (!isBreak) {
-                    // خصم الصفحات وزيادة العداد
                     deductPages();
                     dailyPagesDone += 5;
+                    sessionPagesDone += 5;
                     localStorage.setItem('daily_pages_done', dailyPagesDone);
+                    localStorage.setItem('session_pages_done', sessionPagesDone);
                     
-                    // تشغيل الأنيميشن والـ الاحتفال الفوري برسالة الحب
                     confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
                     document.getElementById('cheerSound').play().catch(e => {});
+                    
+                    if (sessionPagesDone % 10 === 0 && sessionPagesDone > 0) {
+                        document.getElementById('loveModalMessage').innerText = `ملككككة! خلصتي 10 صفحات كاملين في الجلسة دي.. دادي فخور بيكي جداً وليكي ساعة بريك بحالها! 👑🍓`;
+                    } else {
+                        document.getElementById('loveModalMessage').innerText = `دادي بيحبك يا بطاطا.. أحلى 5 صفحات خلصوا! يلا خدي بريك 15 دقيقة 🍓`;
+                    }
+                    
                     document.getElementById('loveModal').style.display = 'flex';
                     
                 } else {
-                    // إذا كان مخلص البريك يرجع لوضعه الطبيعي
                     stopEverything();
                     selectSubject(activeSubId);
                 }
@@ -292,14 +305,21 @@
 
         function closeLoveModal() {
             document.getElementById('loveModal').style.display = 'none';
-            
-            // تحويله التلقائي لوضع البريك بعد قفل المودال مباشرة
             localStorage.setItem('timer_is_break', 'true');
-            const breakDuration = (dailyPagesDone % 10 === 0) ? 60 * 60 : 15 * 60;
-            startTimer(breakDuration);
             
+            let breakDuration;
+            if (sessionPagesDone % 10 === 0 && sessionPagesDone > 0) {
+                breakDuration = 60 * 60; 
+                localStorage.setItem('current_break_duration', '60:00');
+                document.getElementById('sessionInfo').innerText = "عاش يا ملكة! خلصتي 10 صفحات كاملين، دادي مديكي ساعة بريك بحالها للراحة التامة! 👑";
+            } else {
+                breakDuration = 15 * 60; 
+                localStorage.setItem('current_break_duration', '15:00');
+                document.getElementById('sessionInfo').innerText = "بريك 15 دقيقة.. ارتاحي واشربي حاجة بتحبيها يا بطاطا. ☕";
+            }
+            
+            startTimer(breakDuration);
             document.getElementById('statusLabel').innerText = "وقت البريك والراحة ☕";
-            document.getElementById('sessionInfo').innerText = (dailyPagesDone % 10 === 0) ? "عاش يا ملكة! خلصتي 10 صفحات كاملين، دادي مديكي ساعة بريك بحالها!" : "بريك 15 دقيقة.. ارتاحي واشربي حاجة بتحبيها.";
             document.getElementById('timerCard').className = "card text-center flex flex-col justify-center relative overflow-hidden break-active";
         }
 
@@ -312,6 +332,7 @@
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = null;
             localStorage.removeItem('timer_end_time');
+            localStorage.removeItem('current_break_duration');
             localStorage.setItem('timer_is_break', 'false');
             document.getElementById('timerDisp').innerText = "00:00";
             document.getElementById('statusLabel').innerText = "يلا نختار مادة يا بطاطا 🍓";
@@ -329,7 +350,9 @@
             if (activeSubId == id) {
                 stopEverything();
                 activeSubId = null;
+                sessionPagesDone = 0;
                 localStorage.removeItem('active_sub_id');
+                localStorage.removeItem('session_pages_done');
                 document.getElementById('sessionInfo').innerText = "المادة خلصت تماماً! شطورة يا بطاطا دادي فخور بيكي! 🌸";
             }
 
