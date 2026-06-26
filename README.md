@@ -108,7 +108,6 @@
             
             try {
                 const prompt = `أنا يوسف، طالب خريج تجارة وبذاكر حالياً. عندي المواد دي: ${JSON.stringify(subs)}. اعملي جدول مذاكرة مريح جداً بلهجة مصرية، وزعلي الصفحات على الأيام المتبقية بذكاء عشان ما زهقش، واديني نصيحة تشجيعية في الآخر.`;
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyCKpPdJmQUb_5Qr5HcLleZGdRm2hMVmg9I`, {
                     method: 'POST', 
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({contents: [{parts: [{text: prompt}]}]})
